@@ -1,12 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { ShoppingBag, ArrowRight, Sparkles } from 'lucide-react';
 
 export const FloatingCartBar = () => {
   const { itemCount, subtotal, totalSavings } = useCart();
+  const location = useLocation();
 
-  if (itemCount === 0) return null;
+  if (itemCount === 0 || location.pathname.startsWith('/admin')) return null;
 
   return (
     <aside

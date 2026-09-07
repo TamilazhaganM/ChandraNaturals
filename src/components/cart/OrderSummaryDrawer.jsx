@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { VegMark } from '../common/VegMark';
 import { X, Plus, Minus, Trash2, CreditCard, ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
 
@@ -36,11 +38,18 @@ export const OrderSummaryDrawer = () => {
     };
   }, [isCartOpen, setIsCartOpen]);
 
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
   if (!isCartOpen) return null;
 
   const handleProceedToDetails = () => {
     setIsCartOpen(false);
-    setIsCustomerFormOpen(true);
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/checkout');
+    } else {
+      setIsCustomerFormOpen(true);
+    }
   };
 
   return (

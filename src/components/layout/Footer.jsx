@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { BrandLogo } from '../common/BrandLogo';
 import { siteConfig } from '../../config/siteConfig';
 import { MessageSquare, ShieldCheck, ExternalLink, QrCode } from 'lucide-react';
@@ -13,6 +13,12 @@ const InstagramIcon = ({ className = "w-4 h-4" }) => (
 );
 
 export const Footer = () => {
+  const location = useLocation();
+
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <footer className="relative bg-forest-ink text-cream-warm border-t border-gold-antique/25 pt-20 pb-12 overflow-hidden">
       {/* Background Subtle Glows */}
@@ -69,13 +75,13 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/auth" className="hover:text-gold-antique transition-colors">
-                  My Account / Register
+                <Link to="/account" className="hover:text-gold-antique transition-colors">
+                  My Account
                 </Link>
               </li>
               <li>
                 <Link to="/about" className="hover:text-gold-antique transition-colors">
-                  About Our Kitchen
+                  About Us
                 </Link>
               </li>
               <li>
@@ -91,116 +97,153 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Column 3: Collections (3 Cols) */}
-          <div className="lg:col-span-3 space-y-4">
+          {/* Column 3: Legal & Policies (2 Cols) */}
+          <div className="lg:col-span-2 space-y-4">
             <h4 className="font-fraunces text-base font-semibold text-gold-antique tracking-wider uppercase">
-              Pantry Categories
+              Legal & Trust
             </h4>
             <ul className="space-y-2.5 text-sm font-sans">
               <li>
-                <Link to="/shop/thokku" className="hover:text-gold-antique transition-colors flex items-center justify-between">
-                  <span>🫙 Thokku Varieties</span>
-                  <span className="text-xs text-gold-antique/70 font-mono">6 items</span>
+                <Link to="/privacy-policy" className="hover:text-gold-antique transition-colors">
+                  Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/shop/health-mix" className="hover:text-gold-antique transition-colors flex items-center justify-between">
-                  <span>🌾 Health Mix & Grains</span>
-                  <span className="text-xs text-gold-antique/70 font-mono">4 items</span>
+                <Link to="/terms" className="hover:text-gold-antique transition-colors">
+                  Terms & Conditions
                 </Link>
               </li>
               <li>
-                <Link to="/shop/ghee" className="hover:text-gold-antique transition-colors flex items-center justify-between">
-                  <span>🧈 Ghee</span>
-                  <span className="text-xs text-gold-antique/70 font-mono">3 items</span>
+                <Link to="/shipping-policy" className="hover:text-gold-antique transition-colors">
+                  Shipping & Delivery
                 </Link>
               </li>
               <li>
-                <Link to="/shop/masalas" className="hover:text-gold-antique transition-colors flex items-center justify-between">
-                  <span>🌶️ Masalas</span>
-                  <span className="text-xs text-gold-antique/70 font-mono">4 items</span>
+                <Link to="/refund-policy" className="hover:text-gold-antique transition-colors">
+                  Refund & Cancellation
                 </Link>
               </li>
               <li>
-                <Link to="/shop/skin-hair" className="hover:text-gold-antique transition-colors flex items-center justify-between">
-                  <span>🌿 Skin & Hair Care</span>
-                  <span className="text-xs text-gold-antique/70 font-mono">4 items</span>
+                <Link to="/admin/orders" className="hover:text-gold-antique transition-colors text-cream-warm/75">
+                  Kitchen & Store Operations
+                </Link>
+              </li>
+              <li className="pt-2">
+                <span className="text-[11px] uppercase tracking-wider text-gold-antique font-mono font-bold block">
+                  RBI & FSSAI Compliant
+                </span>
+                <span className="text-xs text-cream-warm/70 font-mono">
+                  100% Secure Razorpay
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Collections (2 Cols) */}
+          <div className="lg:col-span-2 space-y-4">
+            <h4 className="font-fraunces text-base font-semibold text-gold-antique tracking-wider uppercase">
+              Categories
+            </h4>
+            <ul className="space-y-2.5 text-sm font-sans">
+              <li>
+                <Link to="/shop/thokku" className="hover:text-gold-antique transition-colors">
+                  Thokku Varieties
                 </Link>
               </li>
               <li>
-                <Link to="/shop/combos" className="hover:text-gold-antique transition-colors flex items-center justify-between">
-                  <span>🎁 Combo Sets & Value Packs</span>
-                  <span className="text-xs text-gold-antique/70 font-mono">4 sets</span>
+                <Link to="/shop/health-mix" className="hover:text-gold-antique transition-colors">
+                  Health Mix & Grains
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop/ghee" className="hover:text-gold-antique transition-colors">
+                  Vedic Bilona Ghee
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop/masalas" className="hover:text-gold-antique transition-colors">
+                  Artisanal Masalas
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop/skin-hair" className="hover:text-gold-antique transition-colors">
+                  Herbal Skin & Hair
+                </Link>
+              </li>
+              <li>
+                <Link to="/shop/combos" className="hover:text-gold-antique transition-colors">
+                  Pantry Combos
                 </Link>
               </li>
             </ul>
-
-            <div className="pt-2">
-              <div className="p-3 rounded-xl bg-forest-deep border border-gold-antique/25 text-xs space-y-1">
-                <span className="text-gold-antique font-semibold block font-sans">🌱 Small Batch Promise</span>
-                <p className="text-cream-warm/75 text-[11px] leading-relaxed font-sans">
-                  Prepared in micro-quantities to ensure zero compromise on taste, aroma, and natural longevity.
-                </p>
-              </div>
-            </div>
           </div>
 
-          {/* Column 4: Instagram QR & Direct WhatsApp (3 Cols) */}
-          <div className="lg:col-span-3 space-y-4">
+          {/* Column 5: Instagram QR & Direct WhatsApp (2 Cols) */}
+          <div className="lg:col-span-2 space-y-4">
             <h4 className="font-fraunces text-base font-semibold text-gold-antique tracking-wider uppercase">
               Connect With Us
             </h4>
 
             {/* Instagram QR Code Placeholder Box */}
-            <div className="p-4 rounded-2xl bg-forest-deep border-2 border-dashed border-gold-antique/40 flex flex-col items-center text-center space-y-2.5 shadow-sm">
+            <div className="p-3.5 rounded-2xl bg-forest-deep border border-gold-antique/35 flex flex-col items-center text-center space-y-2 shadow-sm">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-gold-antique font-sans">
-                <InstagramIcon className="w-4 h-4" />
-                <span>Scan to follow on Instagram</span>
+                <InstagramIcon className="w-3.5 h-3.5" />
+                <span>Instagram</span>
               </div>
               
-              {/* Artistic QR Placeholder visual */}
-              <div className="w-28 h-28 bg-[#FFFDF8] p-2 rounded-xl border border-gold-antique/50 flex flex-col items-center justify-center relative shadow-inner">
-                <QrCode className="w-20 h-20 text-[#0F1D12]" />
+              <div className="w-20 h-20 bg-[#FFFDF8] p-1.5 rounded-xl border border-gold-antique/50 flex flex-col items-center justify-center relative shadow-inner">
+                <QrCode className="w-16 h-16 text-[#0F1D12]" />
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-6 h-6 rounded-full bg-forest-ink flex items-center justify-center border border-gold-antique shadow-sm">
-                    <span className="font-fraunces text-[9px] text-gold-antique font-bold">CN</span>
+                  <div className="w-5 h-5 rounded-full bg-forest-ink flex items-center justify-center border border-gold-antique shadow-sm">
+                    <span className="font-fraunces text-[8px] text-gold-antique font-bold">CN</span>
                   </div>
                 </div>
               </div>
 
-              {/* REPLACE_WITH_INSTAGRAM */}
               <a
                 href={siteConfig.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-gold-antique hover:text-gold-champagne transition-colors font-sans"
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-gold-antique hover:text-gold-champagne transition-colors font-sans"
               >
                 <span>{siteConfig.instagram}</span>
-                <ExternalLink className="w-3 h-3" />
+                <ExternalLink className="w-2.5 h-2.5" />
               </a>
             </div>
 
             {/* Direct WhatsApp Action */}
-            <div className="pt-1">
+            <div>
               <a
                 href={`https://wa.me/${siteConfig.whatsappNumber}?text=${encodeURIComponent("Hello Chandra Naturals, I have a query about your products.")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 border border-[#25D366]/60 text-[#25D366] text-xs font-semibold uppercase tracking-wider transition-colors font-sans"
+                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 border border-[#25D366]/60 text-[#25D366] text-xs font-semibold uppercase tracking-wider transition-colors font-sans"
               >
-                <MessageSquare className="w-4 h-4" />
-                <span>Chat on WhatsApp</span>
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>WhatsApp Us</span>
               </a>
             </div>
           </div>
 
         </div>
 
-        {/* Bottom Bar: Copyright & Note */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-cream-warm/60 font-sans">
+        {/* Bottom Bar: Copyright & Policy Links */}
+        <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-cream-warm/70 font-sans">
           <p>© {new Date().getFullYear()} {siteConfig.brandName}. All rights reserved.</p>
-          <div className="flex items-center gap-2">
-            <span>Crafted with traditional love & authentic kitchen recipes</span>
+          
+          {/* Quick Legal Links */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+            <Link to="/privacy-policy" className="hover:text-gold-antique transition-colors">Privacy Policy</Link>
+            <span>•</span>
+            <Link to="/terms" className="hover:text-gold-antique transition-colors">Terms of Service</Link>
+            <span>•</span>
+            <Link to="/shipping-policy" className="hover:text-gold-antique transition-colors">Shipping Policy</Link>
+            <span>•</span>
+            <Link to="/refund-policy" className="hover:text-gold-antique transition-colors">Refund Policy</Link>
+          </div>
+
+          <div className="flex items-center gap-2 text-cream-warm/60">
+            <span>Handmade with care & purity</span>
           </div>
         </div>
 

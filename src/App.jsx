@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { CartProvider, useCart } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
@@ -14,7 +14,18 @@ import { ContactPage } from './pages/ContactPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { AuthPage } from './pages/AuthPage';
+import { AccountPage } from './pages/AccountPage';
 import { ProductModal } from './components/modal/ProductModal';
+import { ProductDetailPage } from './pages/ProductDetailPage';
+import { PrivacyPolicyPage } from './pages/policies/PrivacyPolicyPage';
+import { TermsPage } from './pages/policies/TermsPage';
+import { ShippingPolicyPage } from './pages/policies/ShippingPolicyPage';
+import { RefundPolicyPage } from './pages/policies/RefundPolicyPage';
+import { AdminGuard } from './components/admin/AdminGuard';
+import { AdminLayout } from './pages/admin/AdminLayout';
+import { AdminOrdersPage } from './pages/admin/AdminOrdersPage';
+import { AdminInventoryPage } from './pages/admin/AdminInventoryPage';
+import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { RazorpayCheckoutModal } from './components/modal/RazorpayCheckoutModal';
 import { FloatingCartBar } from './components/cart/FloatingCartBar';
 import { OrderSummaryDrawer } from './components/cart/OrderSummaryDrawer';
@@ -54,6 +65,7 @@ export function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/shop" element={<ShopPage />} />
                     <Route path="/shop/:categoryId" element={<ShopPage />} />
+                    <Route path="/product/:slug" element={<ProductDetailPage />} />
                     <Route path="/combos" element={<ShopPage />} />
                     <Route path="/special-combo" element={<ShopPage />} />
                     <Route path="/special-combos" element={<ShopPage />} />
@@ -62,8 +74,36 @@ export function App() {
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/login" element={<AuthPage />} />
                     <Route path="/register" element={<AuthPage />} />
+                    <Route path="/account" element={<AccountPage />} />
+                    <Route path="/my-account" element={<AccountPage />} />
+                    <Route path="/orders" element={<AccountPage defaultTab="orders" />} />
+                    <Route path="/profile" element={<AccountPage defaultTab="personal" />} />
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/contact" element={<ContactPage />} />
+
+                    {/* Legal, Shipping, and Return Policies */}
+                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/terms-conditions" element={<TermsPage />} />
+                    <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+                    <Route path="/refund-policy" element={<RefundPolicyPage />} />
+                    <Route path="/cancellation-policy" element={<RefundPolicyPage />} />
+
+                    {/* Admin Kitchen & Dispatch Operations (Protected by AdminGuard) */}
+                    <Route
+                      path="/admin"
+                      element={
+                        <AdminGuard>
+                          <AdminLayout />
+                        </AdminGuard>
+                      }
+                    >
+                      <Route index element={<Navigate to="/admin/orders" replace />} />
+                      <Route path="orders" element={<AdminOrdersPage />} />
+                      <Route path="inventory" element={<AdminInventoryPage />} />
+                      <Route path="dashboard" element={<AdminDashboardPage />} />
+                    </Route>
+
                     {/* Fallback route */}
                     <Route path="*" element={<HomePage />} />
                   </Routes>

@@ -9,8 +9,7 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 // Replace 'rzp_test_XXXXXXXXXX' with your actual Razorpay Key ID
 // Test key works for demo; swap for rzp_live_XXXXX before going live
-// ─────────────────────────────────────────────────────────────────────────────
-const RAZORPAY_KEY_ID = 'rzp_test_1DP5mmOlF5G5ag';
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TYc3JTxRc18uEb';
 
 const loadRazorpayScript = () =>
   new Promise((resolve) => {

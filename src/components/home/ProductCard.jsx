@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { VegMark } from '../common/VegMark';
 import { Badge } from '../common/Badge';
 import { useCart } from '../../context/CartContext';
@@ -14,7 +15,7 @@ export const ProductCard = ({ product }) => {
   const wishlisted = isWishlisted(product.id);
 
   const handleCardClick = (e) => {
-    if (e.target.closest('button.add-btn') || e.target.closest('button.wish-btn')) return;
+    if (e.target.closest('button.add-btn') || e.target.closest('button.wish-btn') || e.target.closest('a')) return;
     setActiveProductModal(product);
   };
 
@@ -55,11 +56,15 @@ export const ProductCard = ({ product }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-forest-ink/80 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
         
         {/* Quick View Pill on Hover */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-          <span className="px-3 py-1.5 rounded-full bg-forest-ink/95 text-gold-antique text-xs font-semibold tracking-wider flex items-center gap-1.5 shadow-lg border border-gold-antique/50 font-sans">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Link
+            to={`/product/${product.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="px-3 py-1.5 rounded-full bg-forest-ink/95 text-gold-antique text-xs font-semibold tracking-wider flex items-center gap-1.5 shadow-lg border border-gold-antique/50 font-sans hover:bg-gold-antique hover:text-[#0F1D12] transition-colors"
+          >
             <Eye className="w-3.5 h-3.5" />
             <span>View Details</span>
-          </span>
+          </Link>
         </div>
 
         {/* In-Cart Pill indicator */}
@@ -99,9 +104,15 @@ export const ProductCard = ({ product }) => {
           </span>
         </div>
 
-        <h3 className="font-fraunces text-xs sm:text-base md:text-lg font-bold leading-tight line-clamp-2 group-hover:text-gold-antique transition-colors">
-          {product.name}
-        </h3>
+        <Link
+          to={`/product/${product.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="block group/link"
+        >
+          <h3 className="font-fraunces text-xs sm:text-base md:text-lg font-bold leading-tight line-clamp-2 group-hover/link:text-gold-antique transition-colors">
+            {product.name}
+          </h3>
+        </Link>
 
         <p className="hidden sm:block font-sans text-xs text-cream-warm/75 line-clamp-2 leading-relaxed">
           {product.shortDescription}

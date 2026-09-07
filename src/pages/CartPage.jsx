@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { VegMark } from '../components/common/VegMark';
 import {
   ShoppingBag, Trash2, Plus, Minus, ArrowRight, ArrowLeft,
@@ -20,6 +21,15 @@ export const CartPage = () => {
   } = useCart();
 
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const handleCheckoutClick = () => {
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/checkout');
+    } else {
+      navigate('/checkout');
+    }
+  };
 
   const freeShippingThreshold = 3000;
   const isFreeShipping = subtotal >= freeShippingThreshold;
@@ -364,7 +374,7 @@ export const CartPage = () => {
                 <div className="space-y-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => navigate('/checkout')}
+                    onClick={handleCheckoutClick}
                     className="w-full py-4 px-6 rounded-xl bg-gold-antique hover:bg-gold-champagne text-forest-ink font-sans font-bold text-sm uppercase tracking-wider transition-all duration-300 shadow-gold-glow flex items-center justify-center gap-2 group cursor-pointer active:scale-[0.99]"
                   >
                     <Lock className="w-4 h-4" />

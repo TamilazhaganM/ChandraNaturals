@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { VegMark } from '../components/common/VegMark';
 import { siteConfig } from '../config/siteConfig';
 import { generateWhatsAppOrderUrl } from '../utils/whatsapp';
+import { orderAPI, paymentAPI } from '../services/api';
 import confetti from 'canvas-confetti';
 import {
   ShieldCheck, Lock, CreditCard, Truck, CheckCircle2, ArrowLeft,
@@ -12,7 +13,7 @@ import {
   MessageSquare, AlertCircle, FileText, Check
 } from 'lucide-react';
 
-const RAZORPAY_KEY_ID = 'rzp_test_1DP5mmOlF5G5ag';
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TYc3JTxRc18uEb';
 
 const loadRazorpayScript = () =>
   new Promise((resolve) => {
@@ -26,8 +27,15 @@ const loadRazorpayScript = () =>
 
 export const CheckoutPage = () => {
   const { cart, subtotal, totalSavings, clearCart, itemCount } = useCart();
-  const { user } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect unauthenticated customers to login with redirect back to /checkout
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate('/login?redirect=/checkout');
+    }
+  }, [isAuthenticated, loading, navigate]);
 
   // Delivery / customer form data
   const [formData, setFormData] = useState({
@@ -99,105 +107,143 @@ export const CheckoutPage = () => {
 
     setIsProcessing(true);
 
-    const generatedOrderId = 'CN-' + Math.floor(100000 + Math.random() * 900000);
-    const orderItemsSnapshot = [...cart];
+    try {
+      // 1. Create order on backend with server-side price calculation
+      const orderPayload = {
+        items: cart.map(item => ({
+          productId: item.product.id || item.product._id,
+          quantity: item.quantity
+        })),
+        shippingAddress: {
+          fullName: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim(),
+          addressLine: formData.address.trim(),
+          city: formData.city.trim(),
+          state: formData.state.trim(),
+          pincode: formData.pincode.trim(),
+          landmark: ''
+        },
+        paymentMethod,
+        notes: formData.notes
+      };
 
-    // Method A: Razorpay Online Payment
-    if (paymentMethod === 'razorpay') {
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) {
-        alert('Unable to connect to Razorpay secure payment gateway. Please check your internet connection or choose COD.');
-        setIsProcessing(false);
+      const orderRes = await orderAPI.createOrder(orderPayload);
+      const serverOrder = orderRes.data?.order;
+      const razorpayOrder = orderRes.data?.razorpayOrder;
+
+      if (!serverOrder) {
+        throw new Error('Order creation failed on server');
+      }
+
+      // Method A: Razorpay Online Payment
+      if (paymentMethod === 'razorpay') {
+        const scriptLoaded = await loadRazorpayScript();
+        if (!scriptLoaded) {
+          alert('Unable to connect to Razorpay secure gateway. Please check your internet or choose COD.');
+          setIsProcessing(false);
+          return;
+        }
+
+        const options = {
+          key: razorpayOrder?.keyId || RAZORPAY_KEY_ID,
+          order_id: razorpayOrder?.id,
+          amount: razorpayOrder?.amount || Math.round(serverOrder.total * 100),
+          currency: 'INR',
+          name: siteConfig.brandName,
+          description: `Artisanal Order #${serverOrder.orderNumber}`,
+          image: '/favicon.svg',
+          prefill: {
+            name: formData.name,
+            email: formData.email,
+            contact: formData.phone
+          },
+          notes: {
+            orderNumber: serverOrder.orderNumber,
+            orderId: serverOrder._id
+          },
+          theme: {
+            color: '#C9A24E'
+          },
+          handler: async (response) => {
+            try {
+              // Verify cryptographic signature on backend
+              await paymentAPI.verifyPayment({
+                orderId: serverOrder._id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              });
+
+              setIsProcessing(false);
+              finishOrderSuccess({
+                orderId: serverOrder.orderNumber,
+                paymentId: response.razorpay_payment_id,
+                paymentMethod: 'Online Payment (Razorpay)',
+                items: serverOrder.items,
+                customer: formData,
+                total: serverOrder.total
+              });
+            } catch (verErr) {
+              setIsProcessing(false);
+              alert('Payment verification error: ' + (verErr.message || 'Signature mismatch'));
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              setIsProcessing(false);
+            }
+          }
+        };
+
+        try {
+          const rzp = new window.Razorpay(options);
+          rzp.on('payment.failed', (response) => {
+            setIsProcessing(false);
+            alert(`Payment failed: ${response.error?.description || 'Declined'}`);
+          });
+          rzp.open();
+        } catch (err) {
+          console.error('Razorpay invocation error:', err);
+          setIsProcessing(false);
+          alert('An error occurred opening the payment window. Please try again.');
+        }
         return;
       }
 
-      const itemsDescription = orderItemsSnapshot
-        .map(item => `${item.product.name} x${item.quantity}`)
-        .join(', ');
-
-      const options = {
-        key: RAZORPAY_KEY_ID,
-        amount: grandTotal * 100, // Amount in paise
-        currency: 'INR',
-        name: siteConfig.brandName,
-        description: `Small-Batch Artisanal Order #${generatedOrderId}`,
-        image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=200&auto=format&fit=crop',
-        prefill: {
-          name: formData.name,
-          email: formData.email,
-          contact: formData.phone
-        },
-        notes: {
-          order_id: generatedOrderId,
-          shipping_address: `${formData.address}, ${formData.city}, ${formData.pincode}`,
-          items: itemsDescription.slice(0, 200)
-        },
-        theme: {
-          color: '#C9A24E'
-        },
-        handler: (response) => {
-          setIsProcessing(false);
-          const paymentId = response.razorpay_payment_id;
-          finishOrderSuccess({
-            orderId: generatedOrderId,
-            paymentId,
-            paymentMethod: 'Online Payment (Razorpay)',
-            items: orderItemsSnapshot,
-            customer: formData,
-            total: grandTotal
-          });
-        },
-        modal: {
-          ondismiss: () => {
-            setIsProcessing(false);
-          }
-        }
-      };
-
-      try {
-        const rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', (response) => {
-          setIsProcessing(false);
-          alert(`Payment failed: ${response.error.description || 'Transaction declined'}`);
-        });
-        rzp.open();
-      } catch (err) {
-        console.error('Razorpay invocation error:', err);
+      // Method B: WhatsApp Direct Order
+      if (paymentMethod === 'whatsapp') {
+        const waUrl = generateWhatsAppOrderUrl(cart, formData, serverOrder.total);
         setIsProcessing(false);
-        alert('An error occurred opening the payment window. Please try again.');
+        window.open(waUrl, '_blank', 'noopener,noreferrer');
+        finishOrderSuccess({
+          orderId: serverOrder.orderNumber,
+          paymentId: 'WhatsApp-Confirmation',
+          paymentMethod: 'WhatsApp Kitchen Order',
+          items: serverOrder.items,
+          customer: formData,
+          total: serverOrder.total
+        });
+        return;
       }
-      return;
-    }
 
-    // Method B: WhatsApp Direct Order
-    if (paymentMethod === 'whatsapp') {
-      const waUrl = generateWhatsAppOrderUrl(cart, formData, grandTotal);
-      setIsProcessing(false);
-      window.open(waUrl, '_blank', 'noopener,noreferrer');
-      finishOrderSuccess({
-        orderId: generatedOrderId,
-        paymentId: 'WhatsApp-Confirmation',
-        paymentMethod: 'WhatsApp Kitchen Order',
-        items: orderItemsSnapshot,
-        customer: formData,
-        total: grandTotal
-      });
-      return;
-    }
-
-    // Method C: Cash on Delivery (COD)
-    if (paymentMethod === 'cod') {
-      setTimeout(() => {
+      // Method C: Cash on Delivery (COD)
+      if (paymentMethod === 'cod') {
         setIsProcessing(false);
         finishOrderSuccess({
-          orderId: generatedOrderId,
+          orderId: serverOrder.orderNumber,
           paymentId: 'COD-Verified',
           paymentMethod: 'Cash on Delivery',
-          items: orderItemsSnapshot,
+          items: serverOrder.items,
           customer: formData,
-          total: grandTotal
+          total: serverOrder.total
         });
-      }, 700);
+        return;
+      }
+    } catch (err) {
+      console.error('Order creation error:', err);
+      setIsProcessing(false);
+      alert(err.message || 'Failed to place order. Please try again.');
     }
   };
 
@@ -314,17 +360,18 @@ export const CheckoutPage = () => {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 font-sans">
               <Link
-                to="/shop"
+                to="/account?tab=orders"
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gold-antique hover:bg-gold-champagne text-forest-ink font-bold text-xs uppercase tracking-wider transition-all shadow-gold-glow flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Truck className="w-4 h-4" />
+                <span>Track Order Live</span>
+              </Link>
+              <Link
+                to="/shop"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-forest-ink hover:bg-forest-moss text-cream-warm border border-gold-antique/40 hover:border-gold-antique font-semibold text-xs uppercase tracking-wider transition-all cursor-pointer text-center flex items-center justify-center gap-2"
               >
                 <span>Continue Shopping</span>
                 <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-forest-ink hover:bg-forest-moss text-cream-warm border border-gold-antique/40 hover:border-gold-antique font-semibold text-xs uppercase tracking-wider transition-all cursor-pointer text-center"
-              >
-                Back to Homepage
               </Link>
             </div>
 

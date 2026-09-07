@@ -9,7 +9,7 @@ import { products } from '../../data/products';
 import {
   ShoppingBag, Sun, Moon, X, ArrowRight,
   ChevronDown, Heart, Search, ArrowUpRight, Menu,
-  Truck, Package, Leaf, Sparkles, Home, User
+  Truck, Package, Leaf, Sparkles, Home, User, MapPin, ShieldCheck
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -111,6 +111,11 @@ export const Navbar = () => {
 
   const isCategoriesActive = (location.pathname === '/shop' || location.pathname.startsWith('/shop/')) && !location.pathname.includes('combo');
   const isSpecialComboActive = location.pathname === '/shop/combos' || location.pathname.includes('combo');
+
+  // Hide storefront navbar inside admin operations hub
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <>
@@ -382,10 +387,10 @@ export const Navbar = () => {
 
                 {/* Account / Login / Register */}
                 <Link
-                  to="/auth"
+                  to={isAuthenticated ? '/account' : '/login'}
                   aria-label={isAuthenticated ? `My Account (${user?.name})` : 'Sign In or Register'}
                   className="relative p-2.5 rounded-full text-gold-antique bg-forest-deep border border-gold-antique/35 hover:border-gold-antique hover:bg-forest-ink transition-all duration-200 cursor-pointer flex items-center gap-2 group"
-                  title={isAuthenticated ? `Signed in as ${user?.name}` : 'Login / Register'}
+                  title={isAuthenticated ? `Signed in as ${user?.name} - View Account` : 'Login / Register'}
                 >
                   <User className="w-4 h-4 text-gold-antique group-hover:scale-110 transition-transform" />
                   {isAuthenticated && (
@@ -394,6 +399,19 @@ export const Navbar = () => {
                     </span>
                   )}
                 </Link>
+
+                {/* Admin Operations Hub (if admin) */}
+                {user?.role === 'admin' && (
+                  <Link
+                    to="/admin/orders"
+                    aria-label="Admin Operations Hub"
+                    className="relative px-3 py-1.5 rounded-full text-gold-antique bg-gold-antique/15 border border-gold-antique hover:bg-gold-antique hover:text-[#0F1D12] transition-all duration-200 cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    title="Kitchen & Dispatch Operations"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span className="hidden xl:inline text-xs font-bold font-sans">Admin</span>
+                  </Link>
+                )}
 
                 {/* Wishlist — desktop only */}
                 <button
@@ -580,7 +598,7 @@ export const Navbar = () => {
 
           {/* Account / User Section */}
           <Link
-            to="/auth"
+            to={isAuthenticated ? '/account' : '/login'}
             onClick={() => setMobileMenuOpen(false)}
             className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-cream-warm hover:bg-forest-deep transition-colors"
           >
@@ -592,6 +610,37 @@ export const Navbar = () => {
               {isAuthenticated ? 'Active' : 'Sign In'}
             </span>
           </Link>
+
+          {isAuthenticated && (
+            <div className="pl-6 space-y-1">
+              <Link
+                to="/account?tab=orders"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs text-stone-300 hover:text-gold-antique hover:bg-forest-deep/60 transition-colors"
+              >
+                <Package className="w-3.5 h-3.5 text-gold-antique" />
+                <span>My Orders & Live Tracking</span>
+              </Link>
+              <Link
+                to="/account?tab=addresses"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs text-stone-300 hover:text-gold-antique hover:bg-forest-deep/60 transition-colors"
+              >
+                <MapPin className="w-3.5 h-3.5 text-gold-antique" />
+                <span>Saved Addresses</span>
+              </Link>
+              {user?.role === 'admin' && (
+                <Link
+                  to="/admin/orders"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-gold-antique bg-gold-antique/15 border border-gold-antique/30 hover:bg-gold-antique hover:text-[#0F1D12] transition-colors"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Kitchen & Store Operations</span>
+                </Link>
+              )}
+            </div>
+          )}
 
           {/* Divider */}
           <div className="h-px bg-gold-antique/15 my-3" />
