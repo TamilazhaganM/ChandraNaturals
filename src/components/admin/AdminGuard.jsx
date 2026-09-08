@@ -5,7 +5,6 @@ import { ShieldCheck, Lock, Sparkles, Store, AlertCircle } from 'lucide-react';
 
 export const AdminGuard = ({ children }) => {
   const { user, isAuthenticated, loading, login } = useAuth();
-  const location = useLocation();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
