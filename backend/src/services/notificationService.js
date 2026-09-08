@@ -318,6 +318,68 @@ class NotificationService {
       return { success: false, error: err.message };
     }
   }
+
+  /**
+   * Send Order Dispatch / Consignment Tracking Notification
+   */
+  async sendOrderDispatched({ order, customer = {}, carrier, trackingNumber }) {
+    try {
+      const subject = `Your Order #${order.orderNumber} Has Been Dispatched! 🚚 - Chandra Naturals`;
+      console.log(`🚚 [Notification] Dispatch email prepared for Order #${order.orderNumber} via ${carrier || 'Courier'}`);
+
+      const transporter = this.getEmailTransporter();
+      const recipientEmail = customer.email || order.shippingAddress?.email;
+
+      if (recipientEmail && transporter) {
+        const trackingLink = trackingNumber
+          ? `https://www.google.com/search?q=${encodeURIComponent((carrier || '') + ' tracking ' + trackingNumber)}`
+          : 'https://chandranaturals.com/account?tab=orders';
+
+        const html = `
+          <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; background: #1F3623; color: #FAF7F0; padding: 28px; border-radius: 16px; border: 1px solid #C9A24E;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h1 style="color: #C9A24E; margin: 0; font-size: 26px;">Chandra Naturals</h1>
+              <p style="color: #E8D9AE; font-size: 13px; margin-top: 4px;">Small-Batch Authentic Goodness</p>
+            </div>
+            <div style="background-color: #16281A; padding: 24px; border-radius: 12px; border: 1px solid rgba(201, 162, 78, 0.3);">
+              <h2 style="color: #C9A24E; margin-top: 0; font-size: 20px;">🚚 Your Package is on the Way!</h2>
+              <p style="font-size: 14px; line-height: 1.6; color: #FAF7F0;">
+                Namaste <strong>${customer.name || order.shippingAddress?.fullName || 'Valued Customer'}</strong>,<br/>
+                Great news! Your handcrafted order <strong>#${order.orderNumber}</strong> has been freshly prepared and handed over to our courier partner.
+              </p>
+              
+              <div style="background: rgba(201, 162, 78, 0.1); border-left: 4px solid #C9A24E; padding: 14px; margin: 20px 0; border-radius: 6px;">
+                <p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Courier Partner:</strong> ${carrier || 'Express Courier'}</p>
+                ${trackingNumber ? `<p style="margin: 0; font-size: 13px;"><strong>AWB / Tracking No:</strong> <span style="font-family: monospace; font-weight: bold; color: #E8D9AE;">${trackingNumber}</span></p>` : ''}
+              </div>
+
+              <div style="text-align: center; margin: 24px 0;">
+                <a href="${trackingLink}" style="display: inline-block; padding: 12px 28px; background-color: #C9A24E; color: #16281A; text-decoration: none; font-weight: bold; border-radius: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+                  Track Your Consignment
+                </a>
+              </div>
+              
+              <p style="font-size: 12px; color: #E8D9AE; text-align: center; margin-bottom: 0;">
+                Deliveries typically arrive within 3-5 business days.
+              </p>
+            </div>
+          </div>
+        `;
+
+        await transporter.sendMail({
+          from: process.env.EMAIL_FROM || '"Chandra Naturals" <hello@chandranaturals.com>',
+          to: recipientEmail,
+          subject,
+          html
+        });
+        console.log(`✉️  [Email SMTP] Dispatch notification delivered to ${recipientEmail}`);
+      }
+      return { success: true };
+    } catch (err) {
+      console.error('⚠️  Failed to dispatch order shipping notification:', err.message);
+      return { success: false, error: err.message };
+    }
+  }
 }
 
 export const notificationService = new NotificationService();

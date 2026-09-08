@@ -250,6 +250,21 @@ export const updateOrderStatus = async (req, res, next) => {
 
     console.log(`📦 [Admin] Order #${order.orderNumber} status updated from ${previousStatus} -> ${status}`);
 
+    // If order was marked as shipped, send dispatch tracking email
+    if (status === ORDER_STATUS.SHIPPED && previousStatus !== ORDER_STATUS.SHIPPED) {
+      notificationService
+        .sendOrderDispatched({
+          order,
+          customer: {
+            name: order.shippingAddress?.fullName,
+            email: order.shippingAddress?.email
+          },
+          carrier: order.trackingInfo?.carrier,
+          trackingNumber: order.trackingInfo?.trackingNumber
+        })
+        .catch(notifErr => console.warn('⚠️  Dispatch notification warning:', notifErr.message));
+    }
+
     return successResponse(res, {
       statusCode: 200,
       message: `Order #${order.orderNumber} status updated to ${status}`,
