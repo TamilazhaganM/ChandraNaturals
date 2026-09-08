@@ -34,15 +34,15 @@ class NotificationService {
         const isGmail = (process.env.EMAIL_HOST && process.env.EMAIL_HOST.includes('gmail')) || user.includes('@gmail.com');
         const transportConfig = isGmail
           ? {
-              service: 'gmail',
-              auth: { user, pass }
-            }
+            service: 'gmail',
+            auth: { user, pass }
+          }
           : {
-              host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-              port: parseInt(process.env.EMAIL_PORT, 10) || 587,
-              secure: process.env.EMAIL_SECURE === 'true',
-              auth: { user, pass }
-            };
+            host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.EMAIL_PORT, 10) || 587,
+            secure: process.env.EMAIL_SECURE === 'true',
+            auth: { user, pass }
+          };
 
         this.emailTransporter = nodemailer.createTransport(transportConfig);
         console.log(`📧 SMTP Email Transporter initialized (${isGmail ? 'Gmail Service' : transportConfig.host}).`);
@@ -344,7 +344,7 @@ class NotificationService {
             <div style="background-color: #16281A; padding: 24px; border-radius: 12px; border: 1px solid rgba(201, 162, 78, 0.3);">
               <h2 style="color: #C9A24E; margin-top: 0; font-size: 20px;">🚚 Your Package is on the Way!</h2>
               <p style="font-size: 14px; line-height: 1.6; color: #FAF7F0;">
-                Namaste <strong>${customer.name || order.shippingAddress?.fullName || 'Valued Customer'}</strong>,<br/>
+                Welcome <strong>${customer.name || order.shippingAddress?.fullName || 'Valued Customer'}</strong>,<br/>
                 Great news! Your handcrafted order <strong>#${order.orderNumber}</strong> has been freshly prepared and handed over to our courier partner.
               </p>
               

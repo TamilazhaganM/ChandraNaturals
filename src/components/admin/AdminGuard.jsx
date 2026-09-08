@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Navigate, useLocation, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { ShieldCheck, Lock, ArrowRight, Sparkles, Store, KeyRound, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Lock, Sparkles, Store, AlertCircle } from 'lucide-react';
 
 export const AdminGuard = ({ children }) => {
   const { user, isAuthenticated, loading, login } = useAuth();
@@ -38,35 +38,24 @@ export const AdminGuard = ({ children }) => {
   const handleAdminLogin = async (e) => {
     e?.preventDefault();
     setErrorMsg('');
+
+    const cleanIdentifier = identifier.trim();
+    const cleanPassword = password.trim();
+
+    if (!cleanIdentifier || !cleanPassword) {
+      setErrorMsg('Please enter your administrator email and password.');
+      return;
+    }
+
     setSubmitting(true);
 
-    const targetIdentifier = identifier.trim() || 'admin@chandranaturals.com';
-    const targetPassword = password.trim() || 'AdminPass@Chandra2026';
-
-    const res = await login({ identifier: targetIdentifier, password: targetPassword });
+    const res = await login({ identifier: cleanIdentifier, password: cleanPassword });
     setSubmitting(false);
 
     if (!res.success) {
       setErrorMsg(res.message || 'Invalid administrative credentials.');
     } else if (res.user?.role !== 'admin') {
-      setErrorMsg('This account does not have store administrator privileges. Please sign in with an Admin account.');
-    }
-  };
-
-  const handleQuickDemoLogin = async () => {
-    setIdentifier('admin@chandranaturals.com');
-    setPassword('AdminPass@Chandra2026');
-    setErrorMsg('');
-    setSubmitting(true);
-
-    const res = await login({
-      identifier: 'admin@chandranaturals.com',
-      password: 'AdminPass@Chandra2026'
-    });
-    setSubmitting(false);
-
-    if (!res.success) {
-      setErrorMsg(res.message || 'Could not authenticate demo admin.');
+      setErrorMsg('Access denied. This account does not have store administrator privileges.');
     }
   };
 
@@ -115,7 +104,7 @@ export const AdminGuard = ({ children }) => {
                   type="text"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="admin@chandranaturals.com"
+                  placeholder="e.g. mtamilazhagan30@gmail.com"
                   required
                   className="w-full px-4 py-3 rounded-xl bg-forest-ink border border-gold-antique/30 text-cream-warm placeholder:text-cream-warm/30 text-sm font-sans focus:outline-none focus:border-gold-antique focus:ring-1 focus:ring-gold-antique transition-all"
                 />
@@ -131,7 +120,7 @@ export const AdminGuard = ({ children }) => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
+                  placeholder="Enter your administrator password"
                   required
                   className="w-full px-4 py-3 rounded-xl bg-forest-ink border border-gold-antique/30 text-cream-warm placeholder:text-cream-warm/30 text-sm font-sans focus:outline-none focus:border-gold-antique focus:ring-1 focus:ring-gold-antique transition-all"
                 />
@@ -156,23 +145,6 @@ export const AdminGuard = ({ children }) => {
               )}
             </button>
           </form>
-
-          {/* Quick Demo Helper */}
-          <div className="pt-4 border-t border-gold-antique/20 space-y-3">
-            <div className="flex items-center justify-between text-[11px] text-cream-warm/60 font-sans">
-              <span>Demo Quick Sign-In</span>
-              <span className="font-mono text-[10px] text-gold-antique">Admin Role</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleQuickDemoLogin}
-              disabled={submitting}
-              className="w-full py-2.5 px-3 rounded-xl bg-forest-ink hover:bg-forest-moss/30 border border-gold-antique/30 hover:border-gold-antique text-gold-antique text-xs font-semibold font-sans transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-            >
-              <KeyRound className="w-3.5 h-3.5" />
-              <span>Sign In as Demo Store Administrator</span>
-            </button>
-          </div>
         </div>
 
         {/* Back to store navigation */}

@@ -119,8 +119,23 @@ export const autoSeedIfEmpty = async () => {
     } else {
       console.log(`🌿 Database verified: ${productCount} active products loaded from MongoDB.`);
     }
+
+    // Ensure designated administrator user (mtamilazhagan30@gmail.com) has full ADMIN role in MongoDB
+    const targetAdminEmail = 'mtamilazhagan30@gmail.com';
+    const existingAdminCandidate = await User.findOne({ email: targetAdminEmail });
+    if (existingAdminCandidate) {
+      if (existingAdminCandidate.role !== ROLES.ADMIN || !existingAdminCandidate.emailVerified) {
+        existingAdminCandidate.role = ROLES.ADMIN;
+        existingAdminCandidate.emailVerified = true;
+        existingAdminCandidate.isActive = true;
+        await existingAdminCandidate.save();
+        console.log(`👑 Admin clearance automatically assigned to ${targetAdminEmail} in MongoDB.`);
+      } else {
+        console.log(`👑 Administrator clearance verified for ${targetAdminEmail}.`);
+      }
+    }
   } catch (err) {
-    console.warn('⚠️  Auto-seed check encountered an issue:', err.message);
+    console.warn('⚠️  Auto-seed/admin check encountered an issue:', err.message);
   }
 };
 

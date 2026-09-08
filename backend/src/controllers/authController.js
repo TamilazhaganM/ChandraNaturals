@@ -309,6 +309,16 @@ export const login = async (req, res, next) => {
       });
     }
 
+    // Ensure designated store administrators are always recognized with ADMIN privileges
+    const authorizedAdmins = ['mtamilazhagan30@gmail.com', (process.env.ADMIN_EMAIL || '').toLowerCase().trim()].filter(Boolean);
+    if (authorizedAdmins.includes(user.email.toLowerCase()) && user.role !== ROLES.ADMIN) {
+      user.role = ROLES.ADMIN;
+      user.emailVerified = true;
+      user.isActive = true;
+      await user.save();
+      console.log(`👑 [Auth] Administrator role confirmed and saved for: ${user.email}`);
+    }
+
     // 3. Generate tokens
     const accessToken = authService.generateAccessToken(user);
     const { rawToken: refreshToken } = await authService.generateRefreshToken(
