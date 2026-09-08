@@ -1,0 +1,65 @@
+services:
+  - type: web
+    name: chandra-naturals-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: FRONTEND_URL
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 15m
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_SECURE
+        value: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_FROM
+        value: "Chandra Naturals <hello@chandranaturals.com>"
+      - key: MSG91_AUTH_KEY
+        sync: false
+      - key: MSG91_SENDER_ID
+        value: CHNDRA
+      - key: MSG91_TEMPLATE_ID
+        sync: false
+      - key: MSG91_EMAIL_DOMAIN
+        value: mail.chandranaturals.in
+      - key: MSG91_EMAIL_FROM_EMAIL
+        value: hello@chandranaturals.com
+      - key: MSG91_EMAIL_FROM_NAME
+        value: "Chandra Naturals"
+      - key: ADMIN_NAME
+        value: "Chandra Admin"
+      - key: ADMIN_EMAIL
+        value: admin@chandranaturals.com
+      - key: ADMIN_PHONE
+        value: 9876500000
+      - key: ADMIN_PASSWORD
+        sync: false

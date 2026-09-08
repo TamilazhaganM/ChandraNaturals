@@ -17,15 +17,10 @@ dist-ssr/
 *.local
 
 # Environment variables & secrets (CRITICAL: NEVER COMMIT SECRETS)
-.env
-.env.local
-.env.*.local
-backend/.env
-backend/.env.local
-backend/.env.*.local
+.env*
 *.env
-!.env.example
-!backend/.env.example
+*.env.*
+*.local
 
 # Editor & OS files
 .vscode/*
