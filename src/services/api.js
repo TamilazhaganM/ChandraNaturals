@@ -157,6 +157,13 @@ export const cartAPI = {
   clearCart: () => api.delete('/cart')
 };
 
+// Wishlist Endpoints
+export const wishlistAPI = {
+  getWishlist: () => api.get('/wishlist'),
+  addToWishlist: (productId) => api.post(`/wishlist/${productId}`, {}),
+  removeFromWishlist: (productId) => api.delete(`/wishlist/${productId}`)
+};
+
 // Address Endpoints
 export const addressAPI = {
   getAddresses: () => api.get('/addresses'),

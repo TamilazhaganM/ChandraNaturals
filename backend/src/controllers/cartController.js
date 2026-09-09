@@ -178,8 +178,15 @@ export const updateCartItem = async (req, res, next) => {
       });
     }
 
+    // Resolve product ObjectId if itemId is a slug or subdocument ID
+    let targetProductId = itemId;
+    if (!itemId.match(/^[0-9a-fA-F]{24}$/)) {
+      const prod = await Product.findOne({ slug: itemId });
+      if (prod) targetProductId = prod._id.toString();
+    }
+
     const itemIndex = cart.items.findIndex(
-      item => item._id.toString() === itemId || item.product.toString() === itemId
+      item => item._id.toString() === itemId || item.product.toString() === targetProductId
     );
 
     if (itemIndex === -1) {
@@ -236,8 +243,15 @@ export const removeFromCart = async (req, res, next) => {
       });
     }
 
+    // Resolve product ObjectId if itemId is a slug
+    let targetProductId = itemId;
+    if (!itemId.match(/^[0-9a-fA-F]{24}$/)) {
+      const prod = await Product.findOne({ slug: itemId });
+      if (prod) targetProductId = prod._id.toString();
+    }
+
     cart.items = cart.items.filter(
-      item => item._id.toString() !== itemId && item.product.toString() !== itemId
+      item => item._id.toString() !== itemId && item.product.toString() !== targetProductId
     );
 
     await cart.save();
