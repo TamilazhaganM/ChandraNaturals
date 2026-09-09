@@ -9,17 +9,16 @@ export const siteConfig = {
   tagline: "Tradition, preserved in every jar.",
   subTagline: "Small-batch thokku and wholesome traditional favourites, made with care and ingredients you can trust.",
   
-  // Client WhatsApp Number (digits only, with country code. e.g. 919876543210)
-  // REPLACE_WITH_CLIENT_NUMBER
-  whatsappNumber: "919876543210", 
+  // Client WhatsApp Number (digits only, with country code)
+  whatsappNumber: "917358808966", 
   
   // Client Social Links & Regulatory Details
   instagram: "@chandranaturals", // REPLACE_WITH_INSTAGRAM
   instagramUrl: "https://instagram.com/chandranaturals",
   fssaiNumber: "12423008000123", // REPLACE_WITH_FSSAI_NUMBER
   
-  supportEmail: "hello@chandranaturals.com", // REPLACE_WITH_SUPPORT_EMAIL
-  phoneDisplay: "+91 98765 43210",
+  supportEmail: "chandranaturals1@gmail.com",
+  phoneDisplay: "+91 73588 08966",
   locationDisplay: "Chennai & Madurai, Tamil Nadu",
   
   currency: {

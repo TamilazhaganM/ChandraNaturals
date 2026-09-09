@@ -156,7 +156,7 @@ export const OrderPackingSlipModal = ({ order, isOpen, onClose }) => {
                     <span>•</span>
                     <span>Coimbatore, Tamil Nadu</span>
                     <span>•</span>
-                    <span>Support: support@chandranaturals.com</span>
+                    <span>Support: chandranaturals1@gmail.com</span>
                   </div>
                 </div>
 
@@ -331,7 +331,7 @@ export const OrderPackingSlipModal = ({ order, isOpen, onClose }) => {
                   "Crafted with heirloom dedication in Coimbatore. Thank you for supporting native artisanal agriculture."
                 </p>
                 <p className="text-[10px] text-[#77887B]">
-                  For queries or transit damage replacement, WhatsApp +91 98765 00000 or write to support@chandranaturals.com
+                  For queries or transit damage replacement, WhatsApp +91 73588 08966 or write to chandranaturals1@gmail.com
                 </p>
               </div>
             </div>

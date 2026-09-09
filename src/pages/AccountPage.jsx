@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { siteConfig } from '../config/siteConfig';
 import { orderAPI, addressAPI } from '../services/api';
 import {
   User, Package, MapPin, Lock, LogOut, CheckCircle2,
@@ -946,7 +947,7 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
                             {/* Bottom Card Actions */}
                             <div className="pt-3 flex flex-wrap items-center justify-between gap-3">
                               <a
-                                href={`https://wa.me/919876543210?text=${encodeURIComponent(
+                                href={`https://wa.me/${siteConfig.whatsappNumber}?text=${encodeURIComponent(
                                   `Namaste Chandra Naturals, I have an inquiry about my Order #${order.orderNumber}`
                                 )}`}
                                 target="_blank"
