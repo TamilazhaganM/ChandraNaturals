@@ -31,12 +31,9 @@ export const ProductCard = ({ product }) => {
       </div>
 
       {/* Top Bar: Veg Mark + Badge */}
-      <div className="flex items-center justify-between gap-1.5 mb-2 sm:mb-3 min-h-[22px] sm:min-h-[26px]">
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-1.5 mb-2 sm:mb-3 min-h-[20px] sm:min-h-[24px]">
+        <div className="flex items-center">
           <VegMark isVeg={product.isVeg} size="sm" />
-          <span className="text-[10px] sm:text-[11px] font-sans font-medium text-cream-warm/75 tracking-wider">
-            {product.weight}
-          </span>
         </div>
         {product.badge && (
           <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded bg-gold-antique/20 text-gold-antique border border-gold-antique/40 font-sans whitespace-nowrap">
@@ -45,8 +42,8 @@ export const ProductCard = ({ product }) => {
         )}
       </div>
 
-      {/* Product Image Frame */}
-      <div className="relative aspect-[4/3] w-full rounded-lg sm:rounded-xl overflow-hidden bg-forest-ink border border-gold-antique/30 mb-2.5 sm:mb-4 group-hover:border-gold-antique/70 transition-colors">
+      {/* Product Image Frame - Spacious Square Frame for High Visual Clarity */}
+      <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden bg-forest-ink border border-gold-antique/30 mb-3 sm:mb-4 group-hover:border-gold-antique/70 transition-colors shadow-inner">
         <img
           src={product.image}
           alt={product.name}

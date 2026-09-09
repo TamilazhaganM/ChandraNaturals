@@ -430,11 +430,10 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
       {feedback.message && (
         <div className="fixed top-24 right-5 z-50 animate-fade-in">
           <div
-            className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-semibold backdrop-blur-md ${
-              feedback.type === 'error'
+            className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-sm font-semibold backdrop-blur-md ${feedback.type === 'error'
                 ? 'bg-rose-500/15 border-rose-500/60 text-rose-800 dark:text-rose-100 bg-forest-deep'
                 : 'bg-forest-deep border-gold-antique text-cream-warm shadow-gold-glow'
-            }`}
+              }`}
           >
             {feedback.type === 'error' ? (
               <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
@@ -454,53 +453,33 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
           <span className="text-gold-antique font-semibold">My Account</span>
         </nav>
 
-        {/* 🌿 Welcome User Header Banner */}
-        <section className="relative overflow-hidden rounded-3xl bg-forest-deep border border-gold-antique/30 p-6 sm:p-8 md:p-10 shadow-lg dark:shadow-2xl">
-          {/* Subtle background decorative blurs */}
-          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-gold-antique/10 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-forest-moss/25 blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div className="flex items-start sm:items-center gap-4 sm:gap-6">
+        {/* Clean & Professional User Header Bar */}
+        <section className="relative overflow-hidden rounded-2xl bg-forest-deep border border-gold-antique/25 p-5 sm:p-6 shadow-md">
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
               {/* User Avatar Initials */}
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-forest-ink border-2 border-gold-antique flex items-center justify-center text-gold-antique shadow-md shrink-0">
-                <span className="font-serif text-2xl sm:text-3xl font-bold uppercase">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-forest-ink border border-gold-antique/40 flex items-center justify-center text-gold-antique shadow-sm shrink-0">
+                <span className="font-serif text-xl sm:text-2xl font-bold uppercase">
                   {user.name ? user.name.charAt(0) : 'U'}
-                </span>
-                <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-forest-deep flex items-center justify-center shadow" title="Active Account">
-                  <Check className="w-3 h-3 text-white stroke-[3]" />
                 </span>
               </div>
 
               <div>
-                <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-gold-antique/15 text-gold-antique border border-gold-antique/30 font-sans">
-                    <Sparkles className="w-3 h-3 text-gold-antique" />
-                    Chandra Pantry Member
-                  </span>
-                  {user.emailVerified && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">
-                      <ShieldCheck className="w-3 h-3" />
-                      Verified
-                    </span>
-                  )}
-                </div>
-
-                <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-cream-warm font-bold tracking-tight">
-                  Welcome, {user.name}! 🌿
+                <h1 className="font-serif text-xl sm:text-2xl text-cream-warm font-bold tracking-tight">
+                  Welcome, {user.name}
                 </h1>
-                <p className="text-sm text-cream-warm/75 font-sans mt-1">
-                  Tradition preserved in every batch. Track your pantry orders and manage your account details.
+                <p className="text-xs text-cream-warm/65 font-sans mt-0.5">
+                  {user.email} {user.phone ? `• +91 ${user.phone}` : ''}
                 </p>
               </div>
             </div>
 
-            {/* Quick Actions in banner */}
-            <div className="flex items-center gap-3">
+            {/* Quick Actions */}
+            <div className="flex items-center gap-2.5">
               {user?.role === 'admin' && (
                 <Link
                   to="/admin/orders"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gold-antique text-[#0F1D12] hover:bg-gold-champagne text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gold-antique text-[#0F1D12] hover:bg-gold-champagne text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
                 >
                   <ShieldCheck className="w-4 h-4" />
                   <span>Kitchen & Store Operations</span>
@@ -509,39 +488,11 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
 
               <button
                 onClick={() => setShowLogoutModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-forest-ink hover:bg-rose-500/15 text-cream-warm/80 hover:text-rose-600 dark:hover:text-rose-300 border border-gold-antique/25 hover:border-rose-400/40 text-xs sm:text-sm font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-forest-ink hover:bg-rose-500/15 text-cream-warm/80 hover:text-rose-600 dark:hover:text-rose-300 border border-gold-antique/25 hover:border-rose-400/40 text-xs font-semibold transition-all shadow-sm active:scale-95 cursor-pointer"
               >
                 <LogOut className="w-4 h-4 text-cream-warm/70 group-hover:text-rose-500" />
                 <span>Sign Out</span>
               </button>
-            </div>
-          </div>
-
-          {/* Quick Metrics Bar */}
-          <div className="mt-8 pt-6 border-t border-gold-antique/20 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center sm:text-left">
-            <div className="p-3 rounded-xl bg-forest-ink border border-gold-antique/20 shadow-sm">
-              <span className="text-xs text-cream-warm/70 font-sans block font-medium">Total Orders</span>
-              <span className="font-serif text-xl sm:text-2xl font-bold text-gold-antique">
-                {ordersLoading ? '—' : orders.length}
-              </span>
-            </div>
-            <div className="p-3 rounded-xl bg-forest-ink border border-gold-antique/20 shadow-sm">
-              <span className="text-xs text-cream-warm/70 font-sans block font-medium">Saved Addresses</span>
-              <span className="font-serif text-xl sm:text-2xl font-bold text-cream-warm">
-                {addressesLoading ? '—' : addresses.length}
-              </span>
-            </div>
-            <div className="p-3 rounded-xl bg-forest-ink border border-gold-antique/20 shadow-sm">
-              <span className="text-xs text-cream-warm/70 font-sans block font-medium">Registered Mobile</span>
-              <span className="font-sans text-xs sm:text-sm font-semibold text-cream-warm truncate block mt-1">
-                +91 {user.phone || '—'}
-              </span>
-            </div>
-            <div className="p-3 rounded-xl bg-forest-ink border border-gold-antique/20 shadow-sm">
-              <span className="text-xs text-cream-warm/70 font-sans block font-medium">Member Email</span>
-              <span className="font-sans text-xs sm:text-sm font-semibold text-cream-warm truncate block mt-1" title={user.email}>
-                {user.email}
-              </span>
             </div>
           </div>
         </section>
@@ -558,22 +509,20 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
 
             <button
               onClick={() => setActiveTab('orders')}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-sans text-sm font-semibold transition-all cursor-pointer ${
-                activeTab === 'orders'
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-sans text-sm font-semibold transition-all cursor-pointer ${activeTab === 'orders'
                   ? 'bg-gold-antique text-[#0F1D12] shadow-md font-bold'
                   : 'text-cream-warm/85 hover:bg-forest-moss/40 hover:text-cream-warm'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3">
                 <Package className="w-4 h-4" />
                 <span>My Orders</span>
               </div>
               <span
-                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                  activeTab === 'orders'
+                className={`px-2 py-0.5 rounded-full text-xs font-bold ${activeTab === 'orders'
                     ? 'bg-[#0F1D12]/15 text-[#0F1D12]'
                     : 'bg-forest-ink border border-gold-antique/20 text-cream-warm/70'
-                }`}
+                  }`}
               >
                 {orders.length}
               </span>
@@ -581,11 +530,10 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
 
             <button
               onClick={() => setActiveTab('personal')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans text-sm font-semibold transition-all cursor-pointer ${
-                activeTab === 'personal'
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans text-sm font-semibold transition-all cursor-pointer ${activeTab === 'personal'
                   ? 'bg-gold-antique text-[#0F1D12] shadow-md font-bold'
                   : 'text-cream-warm/85 hover:bg-forest-moss/40 hover:text-cream-warm'
-              }`}
+                }`}
             >
               <User className="w-4 h-4" />
               <span>Personal Data</span>
@@ -593,22 +541,20 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
 
             <button
               onClick={() => setActiveTab('addresses')}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-sans text-sm font-semibold transition-all cursor-pointer ${
-                activeTab === 'addresses'
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-sans text-sm font-semibold transition-all cursor-pointer ${activeTab === 'addresses'
                   ? 'bg-gold-antique text-[#0F1D12] shadow-md font-bold'
                   : 'text-cream-warm/85 hover:bg-forest-moss/40 hover:text-cream-warm'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3">
                 <MapPin className="w-4 h-4" />
                 <span>Saved Addresses</span>
               </div>
               <span
-                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                  activeTab === 'addresses'
+                className={`px-2 py-0.5 rounded-full text-xs font-bold ${activeTab === 'addresses'
                     ? 'bg-[#0F1D12]/15 text-[#0F1D12]'
                     : 'bg-forest-ink border border-gold-antique/20 text-cream-warm/70'
-                }`}
+                  }`}
               >
                 {addresses.length}
               </span>
@@ -616,11 +562,10 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
 
             <button
               onClick={() => setActiveTab('security')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans text-sm font-semibold transition-all cursor-pointer ${
-                activeTab === 'security'
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-sans text-sm font-semibold transition-all cursor-pointer ${activeTab === 'security'
                   ? 'bg-gold-antique text-[#0F1D12] shadow-md font-bold'
                   : 'text-cream-warm/85 hover:bg-forest-moss/40 hover:text-cream-warm'
-              }`}
+                }`}
             >
               <Lock className="w-4 h-4" />
               <span>Change Password</span>
@@ -667,11 +612,10 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
                       <button
                         key={tab.id}
                         onClick={() => setOrderFilter(tab.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-sans transition-all cursor-pointer ${
-                          orderFilter === tab.id
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-sans transition-all cursor-pointer ${orderFilter === tab.id
                             ? 'bg-gold-antique text-[#0F1D12] font-bold shadow-sm'
                             : 'text-cream-warm/75 hover:text-cream-warm'
-                        }`}
+                          }`}
                       >
                         {tab.label}
                       </button>
@@ -797,18 +741,16 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
                                     return (
                                       <div key={step.title} className="flex flex-col items-center relative z-10">
                                         <div
-                                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                                            isDone
+                                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isDone
                                               ? 'bg-gold-antique text-[#0F1D12] font-bold shadow-md shadow-gold-antique/30'
                                               : 'bg-forest-ink text-cream-warm/40 border border-gold-antique/30'
-                                          } ${isCurrent ? 'ring-4 ring-gold-antique/25 scale-110' : ''}`}
+                                            } ${isCurrent ? 'ring-4 ring-gold-antique/25 scale-110' : ''}`}
                                         >
                                           <StepIcon className="w-4 h-4" />
                                         </div>
                                         <span
-                                          className={`text-[11px] mt-2 font-sans font-semibold hidden sm:block ${
-                                            isDone ? 'text-cream-warm font-bold' : 'text-cream-warm/50'
-                                          }`}
+                                          className={`text-[11px] mt-2 font-sans font-semibold hidden sm:block ${isDone ? 'text-cream-warm font-bold' : 'text-cream-warm/50'
+                                            }`}
                                         >
                                           {step.title}
                                         </span>
@@ -1178,11 +1120,10 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
                     {addresses.map(addr => (
                       <div
                         key={addr._id}
-                        className={`rounded-2xl p-5 bg-forest-deep border transition-all flex flex-col justify-between shadow-sm ${
-                          addr.isDefault
+                        className={`rounded-2xl p-5 bg-forest-deep border transition-all flex flex-col justify-between shadow-sm ${addr.isDefault
                             ? 'border-gold-antique ring-1 ring-gold-antique/30 shadow-md'
                             : 'border-gold-antique/20 hover:border-gold-antique/40'
-                        }`}
+                          }`}
                       >
                         <div className="space-y-3">
                           <div className="flex items-center justify-between gap-2">
@@ -1325,9 +1266,8 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
                         <div className="mt-2 space-y-1">
                           <div className="flex items-center gap-1.5 h-1.5 w-full bg-gold-antique/25 rounded-full overflow-hidden">
                             <div
-                              className={`h-full transition-all ${
-                                getPasswordStrength(passwordForm.newPassword).color
-                              }`}
+                              className={`h-full transition-all ${getPasswordStrength(passwordForm.newPassword).color
+                                }`}
                               style={{
                                 width: `${(getPasswordStrength(passwordForm.newPassword).score / 3) * 100}%`
                               }}
@@ -1521,11 +1461,10 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
                       key={t.id}
                       type="button"
                       onClick={() => setAddressForm({ ...addressForm, addressType: t.id })}
-                      className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                        addressForm.addressType === t.id
+                      className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${addressForm.addressType === t.id
                           ? 'bg-gold-antique text-[#0F1D12] border-gold-antique font-bold shadow-sm'
                           : 'bg-forest-ink text-cream-warm/80 border-gold-antique/25 hover:border-gold-antique/50'
-                      }`}
+                        }`}
                     >
                       <t.icon className="w-3.5 h-3.5" />
                       <span>{t.label}</span>
