@@ -4,7 +4,7 @@ import RefreshToken from '../models/RefreshToken.js';
 import authService from '../services/authService.js';
 import notificationService from '../services/notificationService.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
-import { ERROR_CODES, OTP_PURPOSE, BUSINESS_RULES } from '../config/constants.js';
+import { ERROR_CODES, OTP_PURPOSE, BUSINESS_RULES, ROLES } from '../config/constants.js';
 
 /**
  * Customer Registration
