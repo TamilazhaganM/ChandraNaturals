@@ -2,10 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { BrandLogo } from '../components/common/BrandLogo';
 import { siteConfig } from '../config/siteConfig';
-import { Leaf, Heart, Sparkles, ShieldCheck, Sun, Flame, Utensils, CheckCircle2, ArrowRight, Award, Users, Star, Quote } from 'lucide-react';
+import { Leaf, Heart, Sparkles, ShieldCheck, Sun, Flame, Utensils, CheckCircle2, ArrowRight, Award, Star, Quote } from 'lucide-react';
 import heroImg from '../assets/hero.png';
 import ceoImg from '../assets/ceo_photo.jpg';
-import teamImg from '../assets/team_photo.jpg';
 
 export const AboutPage = () => {
   const pillars = [
@@ -28,29 +27,6 @@ export const AboutPage = () => {
       icon: ShieldCheck,
       title: "100% Preservative Free",
       desc: "No synthetic chemical stabilizers (INS 211 / benzoates), artificial flavor enhancers, or artificial food colorings are ever used in our kitchen."
-    }
-  ];
-
-  const processSteps = [
-    {
-      number: "01",
-      title: "Careful Native Sourcing",
-      desc: "We handpick seasonal fruits and medicinal herbs—from Kili Mooku mangoes to hill garlic—directly from regional farmers."
-    },
-    {
-      number: "02",
-      title: "Hand-Pounding & Sprouting",
-      desc: "Heirloom grains are sprouted and solar-dried. Whole spices are lightly roasted on iron tawas and hand-crushed to preserve volatile oils."
-    },
-    {
-      number: "03",
-      title: "Slow-Simmered Batches",
-      desc: "Cooked in micro-quantities of 15-20 jars at a time to ensure complete temperature control, perfect consistency, and rich flavor depth."
-    },
-    {
-      number: "04",
-      title: "Hand-Sealed in Glass Jars",
-      desc: "Every jar is inspected, sealed, and packed with care in hygienic food-grade glass jars to avoid microplastic contamination."
     }
   ];
 
@@ -167,154 +143,74 @@ export const AboutPage = () => {
           </div>
         </div>
 
-        {/* The 4-Step Artisanal Kitchen Process */}
-        <div className="space-y-10">
+        {/* Meet Our Founder Section */}
+        <div className="space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="font-caveat text-2xl sm:text-3xl text-gold-antique font-semibold block">
-              From Farm to Pantry
+              The Heart Behind Every Jar
             </span>
             <h2 className="font-fraunces text-3xl sm:text-4xl font-bold text-cream-warm">
-              How Every Batch Is Prepared
+              Meet Our Founder
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {processSteps.map((step, idx) => (
-              <div
-                key={idx}
-                className="p-6 rounded-2xl bg-forest-ink border border-gold-antique/25 space-y-3 relative shadow-lg"
-              >
-                <span className="font-fraunces text-3xl font-extrabold text-gold-antique/30 block">
-                  {step.number}
-                </span>
-                <h3 className="font-fraunces text-lg font-bold text-cream-warm">
-                  {step.title}
-                </h3>
-                <p className="font-sans text-xs sm:text-sm text-cream-warm/75 leading-relaxed">
-                  {step.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Meet the Team Section */}
-        <div className="space-y-10">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="font-caveat text-2xl sm:text-3xl text-gold-antique font-semibold block">
-              The Faces Behind The Jars
-            </span>
-            <h2 className="font-fraunces text-3xl sm:text-4xl font-bold text-cream-warm">
-              Meet Our Founder & Team
-            </h2>
-            <p className="font-sans text-sm sm:text-base text-cream-warm/75 leading-relaxed">
-              Chandra Naturals is built on the passion of people who believe that traditional food is a form of love.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="max-w-4xl mx-auto">
             {/* CEO Card */}
-            <div className="relative p-6 sm:p-8 rounded-3xl bg-forest-deep border-2 border-gold-antique/40 hover:border-gold-antique transition-all duration-300 shadow-xl flex flex-col gap-5 group">
+            <div className="relative p-6 sm:p-10 rounded-3xl bg-forest-deep border-2 border-gold-antique/40 hover:border-gold-antique transition-all duration-300 shadow-xl flex flex-col gap-6 group">
               {/* Decorative quote mark */}
               <div className="absolute top-5 right-6 text-gold-antique/15 font-serif text-8xl font-bold leading-none select-none pointer-events-none">
                 &ldquo;
               </div>
 
-              <div className="flex items-start gap-5">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
                 <div className="relative flex-shrink-0">
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-gold-antique/60 shadow-lg">
+                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-gold-antique/60 shadow-lg">
                     <img
                       src={ceoImg}
                       alt="Chandra Devi, Founder & CEO of Chandra Naturals"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
-                  <div className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-gold-antique flex items-center justify-center shadow-md">
-                    <Star className="w-3.5 h-3.5 text-forest-ink fill-forest-ink" />
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gold-antique flex items-center justify-center shadow-md">
+                    <Star className="w-4 h-4 text-forest-ink fill-forest-ink" />
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="font-fraunces text-2xl font-bold text-cream-warm">
+                <div className="space-y-1.5 flex-1">
+                  <h3 className="font-fraunces text-2xl sm:text-3xl font-bold text-cream-warm">
                     Chandra Devi
                   </h3>
-                  <span className="font-caveat text-lg text-gold-antique block">
+                  <span className="font-caveat text-xl text-gold-antique block">
                     Founder & Chief Experience Officer
                   </span>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <span className="px-2.5 py-0.5 rounded-full bg-gold-antique/15 text-gold-antique text-[10px] font-semibold font-sans uppercase tracking-wider border border-gold-antique/30">
+                  <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-1">
+                    <span className="px-3 py-1 rounded-full bg-gold-antique/15 text-gold-antique text-xs font-semibold font-sans uppercase tracking-wider border border-gold-antique/30">
                       Artisan Chef
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-forest-ink text-cream-warm/70 text-[10px] font-semibold font-sans uppercase tracking-wider border border-gold-antique/20">
+                    <span className="px-3 py-1 rounded-full bg-forest-ink text-cream-warm/75 text-xs font-semibold font-sans uppercase tracking-wider border border-gold-antique/20">
                       22+ Years Experience
                     </span>
                   </div>
                 </div>
               </div>
 
-              <p className="font-sans text-sm text-cream-warm/80 leading-relaxed">
-                Chandra grew up watching her grandmother slow-simmer thokku in brass urns every summer. Determined to preserve that flavor for every Indian family, she left her corporate career in 2019 to build Chandra Naturals — cooking every batch by hand, refusing to add a single preservative.
-              </p>
-              <p className="font-sans text-sm text-cream-warm/80 leading-relaxed">
-                Her mission is simple: <em className="text-gold-antique not-italic font-semibold">"Every jar should taste like your grandmother made it."</em> Today, she personally oversees every recipe, every sourcing decision, and every shipment.
-              </p>
+              <div className="space-y-3 font-sans text-sm sm:text-base text-cream-warm/85 leading-relaxed">
+                <p>
+                  Chandra grew up watching her grandmother slow-simmer thokku in brass urns every summer. Determined to preserve that flavor for every Indian family, she left her corporate career in 2019 to build Chandra Naturals — cooking every batch by hand, refusing to add a single preservative.
+                </p>
+                <p>
+                  Her mission is simple: <em className="text-gold-antique not-italic font-semibold">"Every jar should taste like your grandmother made it."</em> Today, she personally oversees every recipe, every sourcing decision, and every shipment.
+                </p>
+              </div>
 
               <div className="pt-4 border-t border-gold-antique/20 grid grid-cols-3 gap-3 text-center">
                 {[
                   { label: '25+', sub: 'Unique Recipes' },
                   { label: '3500+', sub: 'Happy Families' },
-                  { label: '100%', sub: 'Natural' },
+                  { label: '100%', sub: 'Pure & Natural' },
                 ].map(stat => (
                   <div key={stat.label}>
-                    <span className="font-fraunces text-xl font-bold text-gold-antique block">{stat.label}</span>
-                    <span className="text-[10px] text-cream-warm/65 font-sans uppercase tracking-wider">{stat.sub}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Team Card */}
-            <div className="relative p-6 sm:p-8 rounded-3xl bg-forest-deep border-2 border-gold-antique/40 hover:border-gold-antique transition-all duration-300 shadow-xl flex flex-col gap-5 group">
-              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden border-2 border-dashed border-gold-antique/40">
-                <img
-                  src={teamImg}
-                  alt="The Chandra Naturals artisanal kitchen team"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-forest-ink/80 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
-                  <span className="font-caveat text-xl text-gold-antique block">
-                    Our Kitchen Heroes
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-gold-antique" />
-                  <h3 className="font-fraunces text-2xl font-bold text-cream-warm">
-                    Our Artisanal Team
-                  </h3>
-                </div>
-                <span className="font-caveat text-lg text-gold-antique block">
-                  Women-Led, Tradition-Driven
-                </span>
-              </div>
-
-              <p className="font-sans text-sm text-cream-warm/80 leading-relaxed">
-                Behind every jar is a team of 12 passionate women, many of whom come from families with generations of culinary knowledge. They work in small shifts to ensure every batch gets the attention it deserves — from sourcing to sealing.
-              </p>
-              <p className="font-sans text-sm text-cream-warm/80 leading-relaxed">
-                Our team follows a strict <strong className="text-gold-antique">no shortcuts, no additives</strong> philosophy. When a batch doesn't meet our internal taste standards, we redo it. No compromises — ever.
-              </p>
-
-              <div className="pt-4 border-t border-gold-antique/20 space-y-2">
-                {[
-                  '🧑‍🍳 Trained in traditional South Indian culinary arts',
-                  '🌿 Committed to zero-waste kitchen practices',
-                  '♥ Each batch tasted and approved before dispatch',
-                ].map((val, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs font-sans text-cream-warm/80">
-                    <span>{val}</span>
+                    <span className="font-fraunces text-xl sm:text-2xl font-bold text-gold-antique block">{stat.label}</span>
+                    <span className="text-[10px] sm:text-xs text-cream-warm/65 font-sans uppercase tracking-wider">{stat.sub}</span>
                   </div>
                 ))}
               </div>

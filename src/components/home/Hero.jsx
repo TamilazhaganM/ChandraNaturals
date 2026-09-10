@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowDown, Sparkles, ArrowRight, ChevronLeft, ChevronRight, ShoppingBag, Star, ShieldCheck, Flame } from 'lucide-react';
+import { ArrowDown, Sparkles, ChevronLeft, ChevronRight, ShoppingBag, Star, ShieldCheck, Flame } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { productCategories } from '../../data/products';
 
@@ -179,33 +179,26 @@ export const Hero = () => {
         </div>
 
         {/* Circular Categories Showcase Strip */}
-        <div className="pt-6 border-t border-gold-antique/20 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="pt-6 border-t border-gold-antique/20 space-y-5">
+          <div className="flex items-center justify-center">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-gold-antique" />
-              <h2 className="font-fraunces text-lg sm:text-xl font-bold text-cream-warm">
+              <h2 className="font-fraunces text-xl sm:text-2xl font-bold text-cream-warm">
                 Explore by Category
               </h2>
             </div>
-            <Link
-              to="/shop"
-              className="text-xs font-semibold text-gold-antique hover:text-gold-champagne flex items-center gap-1 font-sans group"
-            >
-              <span>View All</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </Link>
           </div>
 
-          {/* Round Categories Grid / Flex Carousel */}
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 sm:gap-6 justify-items-center">
+          {/* Round Categories Grid */}
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-6 justify-items-center">
             {allHeroCategories.map((cat) => (
               <Link
                 key={cat.id}
                 to={`/shop/${cat.id}`}
-                className="group flex flex-col items-center text-center space-y-2 cursor-pointer w-full max-w-[110px]"
+                className="group flex flex-col items-center text-center space-y-2.5 cursor-pointer w-full max-w-[120px] sm:max-w-[140px]"
               >
                 {/* Round Image Frame */}
-                <div className="relative w-18 h-18 sm:w-20 sm:h-20 md:w-22 md:h-22 rounded-full p-1 border-2 border-gold-antique/40 group-hover:border-gold-antique bg-forest-deep shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-gold-glow">
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full p-1 border-2 border-gold-antique/40 group-hover:border-gold-antique bg-forest-deep shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-gold-glow">
                   <div className="w-full h-full rounded-full overflow-hidden">
                     <img
                       src={cat.image}
@@ -217,7 +210,7 @@ export const Hero = () => {
                 </div>
 
                 {/* Category Label */}
-                <span className="font-sans text-[11px] sm:text-xs font-semibold text-cream-warm group-hover:text-gold-antique transition-colors leading-tight line-clamp-2">
+                <span className="font-sans text-xs sm:text-sm font-semibold text-cream-warm group-hover:text-gold-antique transition-colors leading-tight line-clamp-2">
                   {cat.name}
                 </span>
               </Link>

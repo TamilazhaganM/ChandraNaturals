@@ -27,7 +27,7 @@ export const TrustBadges = () => {
   ];
 
   return (
-    <section id="trust-badges" className="relative py-6 bg-forest-deep border-y border-gold-antique/20">
+    <section id="trust-badges" className="hidden sm:block relative py-6 bg-forest-deep border-y border-gold-antique/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-center">
           {badges.map((badge, idx) => {
