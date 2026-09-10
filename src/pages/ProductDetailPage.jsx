@@ -212,25 +212,6 @@ export const ProductDetailPage = () => {
                 </span>
               </div>
             </div>
-
-            {/* Quick Guarantees Bar */}
-            <div className="grid grid-cols-3 gap-2.5 text-center text-xs font-sans">
-              <div className="p-2.5 rounded-xl bg-forest-deep border border-gold-antique/20 space-y-0.5">
-                <ShieldCheck className="w-4 h-4 text-gold-antique mx-auto" />
-                <span className="font-bold text-cream-warm block">Zero Preservatives</span>
-                <span className="text-[10px] text-cream-warm/70">100% pure kitchen</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-forest-deep border border-gold-antique/20 space-y-0.5">
-                <Utensils className="w-4 h-4 text-gold-antique mx-auto" />
-                <span className="font-bold text-cream-warm block">Cold-Pressed Oil</span>
-                <span className="text-[10px] text-cream-warm/70">Wood churned</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-forest-deep border border-gold-antique/20 space-y-0.5">
-                <Truck className="w-4 h-4 text-gold-antique mx-auto" />
-                <span className="font-bold text-cream-warm block">Pan-India Express</span>
-                <span className="text-[10px] text-cream-warm/70">Glass safe packaging</span>
-              </div>
-            </div>
           </div>
 
           {/* Right Column: Product Purchasing & Specs (6 Cols) */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { VegMark } from '../common/VegMark';
 import { Badge } from '../common/Badge';
 import { useCart } from '../../context/CartContext';
@@ -7,7 +7,8 @@ import { useWishlist } from '../../context/WishlistContext';
 import { ShoppingBag, Eye, Check, Star, Heart } from 'lucide-react';
 
 export const ProductCard = ({ product }) => {
-  const { addToCart, setActiveProductModal, cart } = useCart();
+  const navigate = useNavigate();
+  const { addToCart, cart } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
 
   const cartItem = cart.find(item => item.product.id === product.id);
@@ -16,7 +17,7 @@ export const ProductCard = ({ product }) => {
 
   const handleCardClick = (e) => {
     if (e.target.closest('button.add-btn') || e.target.closest('button.wish-btn') || e.target.closest('a')) return;
-    setActiveProductModal(product);
+    navigate(`/product/${product.id}`);
   };
 
   return (

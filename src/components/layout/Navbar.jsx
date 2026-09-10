@@ -14,7 +14,7 @@ import {
 
 export const Navbar = () => {
   const { toggleTheme, isDark } = useTheme();
-  const { itemCount, subtotal, setActiveProductModal } = useCart();
+  const { itemCount, subtotal } = useCart();
   const { wishlistCount, setIsWishlistOpen } = useWishlist();
   const { user, isAuthenticated } = useAuth();
 
@@ -320,7 +320,7 @@ export const Navbar = () => {
                                   key={product.id}
                                   type="button"
                                   onClick={() => {
-                                    setActiveProductModal(product);
+                                    navigate(`/product/${product.id}`);
                                     setSearchOpen(false);
                                     setSearchQuery('');
                                   }}

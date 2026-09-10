@@ -3,7 +3,6 @@ import { Hero } from '../components/home/Hero';
 import { TrustBadges } from '../components/home/TrustBadges';
 import { FeaturedProductsSection } from '../components/home/FeaturedProductsSection';
 import { FreshnessSection } from '../components/home/FreshnessSection';
-import { HowToOrder } from '../components/home/HowToOrder';
 import { TestimonialsSection } from '../components/home/TestimonialsSection';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles } from 'lucide-react';
@@ -25,9 +24,6 @@ export const HomePage = () => {
 
       {/* 5. Storage & Freshness Information */}
       <FreshnessSection />
-
-      {/* 9. How to Order Guide */}
-      <HowToOrder />
 
       {/* 10. Direct Pantry Callout Banner */}
       <section className="py-16 bg-forest-deep border-t border-gold-antique/25 relative overflow-hidden text-center">

@@ -90,21 +90,29 @@ export const WishlistDrawer = () => {
                   className="p-3.5 rounded-xl bg-forest-ink/70 border border-gold-antique/25 flex items-center gap-3.5 group hover:border-gold-antique/50 transition-colors"
                 >
                   {/* Thumbnail */}
-                  <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-gold-antique/30 bg-forest-ink">
+                  <Link
+                    to={`/product/${product.id}`}
+                    onClick={() => setIsWishlistOpen(false)}
+                    className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-gold-antique/30 bg-forest-ink hover:border-gold-antique transition-colors block"
+                  >
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
-                  </div>
+                  </Link>
 
                   {/* Details */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5">
                       <VegMark isVeg={product.isVeg} size="sm" />
-                      <h4 className="font-fraunces text-sm font-bold truncate">
+                      <Link
+                        to={`/product/${product.id}`}
+                        onClick={() => setIsWishlistOpen(false)}
+                        className="font-fraunces text-sm font-bold truncate hover:text-gold-antique transition-colors block"
+                      >
                         {product.name}
-                      </h4>
+                      </Link>
                     </div>
                     <span className="text-[11px] text-cream-warm/65 block mb-2">
                       {product.weight} • ₹{product.price}

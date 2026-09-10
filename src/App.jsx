@@ -15,7 +15,6 @@ import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { AuthPage } from './pages/AuthPage';
 import { AccountPage } from './pages/AccountPage';
-import { ProductModal } from './components/modal/ProductModal';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { PrivacyPolicyPage } from './pages/policies/PrivacyPolicyPage';
 import { TermsPage } from './pages/policies/TermsPage';
@@ -113,7 +112,6 @@ export function App() {
               <Footer />
 
               {/* Interactive Global Overlays, Floating Buttons & Drawers */}
-              <ProductModal />
               <OrderSummaryDrawer />
               <RazorpayCheckoutModal />
               <WishlistDrawer />

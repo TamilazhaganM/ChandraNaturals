@@ -1,7 +1,6 @@
 import React from 'react';
 import { ProductCard } from './ProductCard';
-import { Sparkles, ArrowRight, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
 import { products } from '../../data/products';
 
 export const FeaturedProductsSection = () => {
@@ -53,17 +52,6 @@ export const FeaturedProductsSection = () => {
           {finalProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
-        </div>
-
-        {/* Bottom CTA to explore all categories */}
-        <div className="text-center pt-4">
-          <Link
-            to="/shop"
-            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-gold-antique hover:bg-gold-champagne text-forest-ink font-sans font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 shadow-gold-glow group hover:scale-[1.02] active:scale-95"
-          >
-            <span>Explore Complete Pantry</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
         </div>
 
       </div>

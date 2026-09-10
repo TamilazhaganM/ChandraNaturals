@@ -160,7 +160,7 @@ class NotificationService {
           <p style="color: #E8D9AE; font-size: 13px; margin-top: 4px;">Tradition, preserved in every jar.</p>
         </div>
         <div style="background-color: #16281A; padding: 24px; border-radius: 12px; border: 1px solid rgba(201, 162, 78, 0.3);">
-          <p style="font-size: 16px; margin-top: 0;">Namaste ${recipientName},</p>
+          <p style="font-size: 16px; margin-top: 0;">Welcome ${recipientName},</p>
           <p style="font-size: 14px; line-height: 1.6; color: #FAF7F0;">
             Use the following 6-digit one-time verification code to complete your ${purpose.replace('_', ' ')}.
           </p>

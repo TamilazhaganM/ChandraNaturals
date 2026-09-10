@@ -16,8 +16,7 @@ export const CartPage = () => {
     clearCart,
     subtotal,
     itemCount,
-    totalSavings,
-    setActiveProductModal
+    totalSavings
   } = useCart();
 
   const navigate = useNavigate();
@@ -170,16 +169,16 @@ export const CartPage = () => {
                     >
                       {/* Product Info & Thumbnail (6 Cols) */}
                       <div className="col-span-6 flex items-center gap-4 w-full">
-                        <div
-                          onClick={() => setActiveProductModal(item.product)}
-                          className="w-20 h-20 sm:w-22 sm:h-22 rounded-xl overflow-hidden flex-shrink-0 border border-gold-antique/30 bg-forest-ink cursor-pointer group-hover:border-gold-antique transition-colors relative"
+                        <Link
+                          to={`/product/${item.product.id}`}
+                          className="w-20 h-20 sm:w-22 sm:h-22 rounded-xl overflow-hidden flex-shrink-0 border border-gold-antique/30 bg-forest-ink cursor-pointer group-hover:border-gold-antique transition-colors relative block"
                         >
                           <img
                             src={item.product.image}
                             alt={item.product.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
-                        </div>
+                        </Link>
 
                         <div className="flex-1 min-w-0 space-y-1">
                           <div className="flex items-center gap-2">
@@ -189,12 +188,11 @@ export const CartPage = () => {
                             </span>
                           </div>
 
-                          <h3
-                            onClick={() => setActiveProductModal(item.product)}
-                            className="font-fraunces text-base sm:text-lg font-bold text-cream-warm hover:text-gold-antique transition-colors cursor-pointer line-clamp-1"
-                          >
-                            {item.product.name}
-                          </h3>
+                          <Link to={`/product/${item.product.id}`} className="block">
+                            <h3 className="font-fraunces text-base sm:text-lg font-bold text-cream-warm hover:text-gold-antique transition-colors cursor-pointer line-clamp-1">
+                              {item.product.name}
+                            </h3>
+                          </Link>
 
                           <div className="flex items-center gap-2 text-xs text-cream-warm/65 font-sans">
                             <span className="bg-forest-ink px-2 py-0.5 rounded border border-gold-antique/20 font-medium">

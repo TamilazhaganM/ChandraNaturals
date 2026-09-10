@@ -62,15 +62,6 @@ export const Hero = () => {
     setCurrentSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length);
   };
 
-  const handleExploreFeatured = () => {
-    const el = document.getElementById('featured-products');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      navigate('/shop');
-    }
-  };
-
   // 6 balanced categories for even 3x2 on mobile, 6x1 on desktop
   const allHeroCategories = [
     ...productCategories,
@@ -185,41 +176,6 @@ export const Hero = () => {
               Handcrafted small-batch thokkus, Vedic A2 bilona ghee, and multi-millet porridge mixes prepared with authentic heirloom recipes. Zero preservatives, 100% pure taste.
             </p>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <button
-              onClick={handleExploreFeatured}
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-gold-antique hover:bg-gold-champagne text-forest-ink font-sans font-bold text-xs sm:text-sm tracking-wider uppercase transition-all duration-300 shadow-gold-glow flex items-center justify-center gap-2 group cursor-pointer"
-            >
-              <span>Explore Featured</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-
-            <Link
-              to="/shop"
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-forest-deep hover:bg-forest-moss text-cream-warm border border-gold-antique/50 hover:border-gold-antique font-sans font-semibold text-xs sm:text-sm tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-            >
-              <span>Browse All Pantry</span>
-            </Link>
-          </div>
-
-          {/* Quick Trust Highlights */}
-          <div className="pt-4 grid grid-cols-3 gap-4 border-t border-gold-antique/25 max-w-xl mx-auto">
-            <div className="text-center">
-              <span className="font-fraunces text-lg sm:text-2xl font-bold text-gold-antique block">100%</span>
-              <span className="text-[10px] sm:text-xs uppercase tracking-wider text-cream-warm/75 font-medium font-sans">Cold-Pressed Oil</span>
-            </div>
-            <div className="text-center border-x border-gold-antique/25 px-2">
-              <span className="font-fraunces text-lg sm:text-2xl font-bold text-gold-antique block">Vedic</span>
-              <span className="text-[10px] sm:text-xs uppercase tracking-wider text-cream-warm/75 font-medium font-sans">A2 Bilona Ghee</span>
-            </div>
-            <div className="text-center">
-              <span className="font-fraunces text-lg sm:text-2xl font-bold text-gold-antique block">Zero</span>
-              <span className="text-[10px] sm:text-xs uppercase tracking-wider text-cream-warm/75 font-medium font-sans">Preservatives</span>
-            </div>
-          </div>
-
         </div>
 
         {/* Circular Categories Showcase Strip */}
