@@ -88,8 +88,8 @@ export const Hero = () => {
           onMouseEnter={() => setIsAutoPlaying(false)}
           onMouseLeave={() => setIsAutoPlaying(true)}
         >
-          {/* Slides Track: Matches 1376x768 widescreen aspect ratio perfectly on all devices (100% Full Content) */}
-          <div className="relative w-full aspect-[1376/768] overflow-hidden bg-forest-ink">
+          {/* Slides Track: Taller height on mobile for clear visibility, widescreen aspect ratio on tablet & desktop */}
+          <div className="relative w-full min-h-[260px] sm:min-h-0 aspect-[4/3] sm:aspect-[1376/768] overflow-hidden bg-forest-ink">
             {bannerSlides.map((slide, idx) => (
               <div
                 key={slide.id}
