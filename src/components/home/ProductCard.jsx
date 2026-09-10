@@ -25,12 +25,6 @@ export const ProductCard = ({ product }) => {
       onClick={handleCardClick}
       className="paper-tag-card group cursor-pointer flex flex-col justify-between p-3 sm:p-5 pb-4 sm:pb-6 text-cream-warm relative"
     >
-      {/* Top Grommet & Twine Tag Loop */}
-      <div className="relative -mt-1 mb-2 sm:mb-3">
-        <div className="tag-string-loop" />
-        <div className="grommet-hole scale-75 sm:scale-100" />
-      </div>
-
       {/* Top Bar: Veg Mark + Badge */}
       <div className="flex items-center justify-between gap-1.5 mb-2 sm:mb-3 min-h-[20px] sm:min-h-[24px]">
         <div className="flex items-center">

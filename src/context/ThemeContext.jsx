@@ -3,13 +3,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // Dark theme is the primary default as required
+  // Light theme is the primary default for new users
   const [theme, setTheme] = useState(() => {
     try {
       const savedTheme = localStorage.getItem('chandra_theme');
-      return savedTheme === 'light' ? 'light' : 'dark';
+      return savedTheme === 'dark' ? 'dark' : 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
 

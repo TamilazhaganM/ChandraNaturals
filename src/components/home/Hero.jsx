@@ -4,8 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { productCategories } from '../../data/products';
 
 import bannerTomatoMix from '../../assets/Banners/tomato_mix_banner_1788165188730.jpg';
-import bannerPirandaiMudakathan from '../../assets/Banners/banner_pirandai_mudakathan_two_.jpg';
-import bannerComboOne from '../../assets/Banners/banner_combo_one_.jpg';
+import bannerGhee from '../../assets/Banners/Ghee.png';
+import bannerPirandaiMudakathan from '../../assets/Banners/Pirandai and mudakathan.png';
+import bannerTomatoPoondu from '../../assets/Banners/Tomato and poondu.png';
 
 export const Hero = () => {
   const navigate = useNavigate();
@@ -25,6 +26,16 @@ export const Hero = () => {
     },
     {
       id: 2,
+      tag: "Vedic Tradition",
+      title: "Cultured A2 Bilona Ghee",
+      subtitle: "Handcrafted from grass-fed native indigenous cow curd using traditional wooden bilona churning.",
+      badge: "Pure A2 Ghee",
+      image: bannerGhee,
+      link: "/shop/ghee",
+      linkText: "Explore Collection"
+    },
+    {
+      id: 3,
       tag: "Medicinal Greens",
       title: "Pirandai & Mudakathan Thokku",
       subtitle: "Wild-harvested medicinal greens for natural joint comfort, digestive wellness, and bone vitality.",
@@ -34,13 +45,13 @@ export const Hero = () => {
       linkText: "Explore Collection"
     },
     {
-      id: 3,
-      tag: "Artisanal Pantry Range",
-      title: "Handcrafted Heritage Combos",
-      subtitle: "Curated small-batch thokkus, sprouted grain mixes, and wholesome traditional pantry essentials.",
-      badge: "Complete Pantry",
-      image: bannerComboOne,
-      link: "/shop",
+      id: 4,
+      tag: "Immunity & Flavor",
+      title: "Tomato & Poondu (Garlic) Thokku",
+      subtitle: "Slow-simmered country tomatoes with whole roasted garlic cloves and native wood-pressed gingelly oil.",
+      badge: "Bestseller Combo",
+      image: bannerTomatoPoondu,
+      link: "/shop/thokku",
       linkText: "Explore Collection"
     }
   ];
