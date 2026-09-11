@@ -33,7 +33,7 @@ export const ShippingPolicyPage = () => {
             </div>
             <div className="p-4 rounded-2xl bg-forest-ink/60 border border-gold-antique/25 space-y-1">
               <span className="text-xs font-bold text-gold-antique uppercase tracking-wider font-sans">Pan-India Transit Time</span>
-              <p className="font-serif text-lg font-bold text-cream-warm">5 to 7 Working Days</p>
+              <p className="font-serif text-lg font-bold text-cream-warm">3 to 5 Working Days</p>
               <p className="text-xs text-cream-warm/75">Delivered via premier air and surface express couriers.</p>
             </div>
           </div>

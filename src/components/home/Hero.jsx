@@ -181,11 +181,6 @@ export const Hero = () => {
                 </svg>
               </span>
             </h1>
-
-            {/* Supporting Copy */}
-            <p className="font-sans text-sm sm:text-base md:text-lg text-cream-warm/85 leading-relaxed max-w-2xl mx-auto font-normal">
-              Handcrafted small-batch thokkus, Vedic A2 bilona ghee, and multi-millet porridge mixes prepared with authentic heirloom recipes. Zero preservatives, 100% pure taste.
-            </p>
           </div>
         </div>
 
@@ -201,15 +196,15 @@ export const Hero = () => {
           </div>
 
           {/* Round Categories Grid */}
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-6 justify-items-center">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3.5 sm:gap-6 md:gap-8 justify-items-center">
             {allHeroCategories.map((cat) => (
               <Link
                 key={cat.id}
                 to={`/shop/${cat.id}`}
-                className="group flex flex-col items-center text-center space-y-2.5 cursor-pointer w-full max-w-[120px] sm:max-w-[140px]"
+                className="group flex flex-col items-center text-center space-y-2.5 cursor-pointer w-full max-w-[135px] sm:max-w-[155px] md:max-w-[170px]"
               >
-                {/* Round Image Frame */}
-                <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full p-1 border-2 border-gold-antique/40 group-hover:border-gold-antique bg-forest-deep shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-gold-glow">
+                {/* Round Image Frame - Enlarged For High Clarity */}
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 rounded-full p-1.5 border-2 border-gold-antique/40 group-hover:border-gold-antique bg-forest-deep shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:shadow-gold-glow">
                   <div className="w-full h-full rounded-full overflow-hidden">
                     <img
                       src={cat.image}
@@ -234,7 +229,7 @@ export const Hero = () => {
       {/* Down Scroll Indicator */}
       <div
         className="mt-8 flex flex-col items-center gap-1 opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
-        onClick={() => scrollTo('#trust-badges')}
+        onClick={() => scrollTo('#featured-products')}
       >
         <span className="text-[10px] tracking-widest uppercase font-semibold text-gold-antique font-sans">Scroll</span>
         <ArrowDown className="w-4 h-4 text-gold-antique animate-bounce" />

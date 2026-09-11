@@ -26,7 +26,7 @@ const loadRazorpayScript = () =>
   });
 
 export const CheckoutPage = () => {
-  const { cart, subtotal, totalSavings, clearCart, itemCount } = useCart();
+  const { cart, subtotal, totalOriginalPrice, totalSavings, clearCart, itemCount } = useCart();
   const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -799,18 +799,28 @@ export const CheckoutPage = () => {
 
               {/* Price Calculation Breakdown */}
               <div className="pt-3 border-t border-gold-antique/20 space-y-2.5 font-sans text-xs">
-                <div className="flex justify-between text-cream-warm/85">
-                  <span>Items Subtotal</span>
-                  <span className="font-mono font-bold">₹{subtotal}</span>
-                </div>
-
-                {totalSavings > 0 && (
-                  <div className="flex justify-between text-emerald-400 font-semibold">
-                    <span className="flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
-                      Special Savings
-                    </span>
-                    <span className="font-mono">- ₹{totalSavings}</span>
+                {totalSavings > 0 ? (
+                  <>
+                    <div className="flex justify-between text-cream-warm/85">
+                      <span>Total MRP</span>
+                      <span className="font-mono text-cream-warm/60 line-through">₹{totalOriginalPrice}</span>
+                    </div>
+                    <div className="flex justify-between text-emerald-400 font-semibold">
+                      <span className="flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" />
+                        Discount on MRP
+                      </span>
+                      <span className="font-mono">- ₹{totalSavings}</span>
+                    </div>
+                    <div className="flex justify-between text-cream-warm/85">
+                      <span>Items Subtotal</span>
+                      <span className="font-mono font-bold">₹{subtotal}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between text-cream-warm/85">
+                    <span>Items Subtotal</span>
+                    <span className="font-mono font-bold">₹{subtotal}</span>
                   </div>
                 )}
 
@@ -838,6 +848,13 @@ export const CheckoutPage = () => {
                     ₹{grandTotal}
                   </span>
                 </div>
+
+                {totalSavings > 0 && (
+                  <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center font-medium text-[11px] flex items-center justify-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>You are saving ₹{totalSavings} on this order!</span>
+                  </div>
+                )}
               </div>
 
               {/* Trust Badges */}
@@ -848,7 +865,7 @@ export const CheckoutPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Truck className="w-4 h-4 text-gold-antique flex-shrink-0" />
-                  <span>Delivered safely across India in 5-7 business days</span>
+                  <span>Delivered safely across India in 3-5 business days</span>
                 </div>
               </div>
 

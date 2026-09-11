@@ -15,6 +15,7 @@ export const CartPage = () => {
     removeFromCart,
     clearCart,
     subtotal,
+    totalOriginalPrice,
     itemCount,
     totalSavings
   } = useCart();
@@ -327,18 +328,28 @@ export const CartPage = () => {
 
                 {/* Calculation Rows */}
                 <div className="space-y-3 font-sans text-xs sm:text-sm">
-                  <div className="flex justify-between text-cream-warm/85">
-                    <span>Items Subtotal</span>
-                    <span className="font-mono font-bold text-cream-warm">₹{subtotal}</span>
-                  </div>
-
-                  {totalSavings > 0 && (
-                    <div className="flex justify-between text-emerald-400 font-semibold">
-                      <span className="flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        Special Bundle Savings
-                      </span>
-                      <span className="font-mono">- ₹{totalSavings}</span>
+                  {totalSavings > 0 ? (
+                    <>
+                      <div className="flex justify-between text-cream-warm/85">
+                        <span>Total MRP</span>
+                        <span className="font-mono text-cream-warm/60 line-through">₹{totalOriginalPrice}</span>
+                      </div>
+                      <div className="flex justify-between text-emerald-400 font-semibold">
+                        <span className="flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          Discount on MRP
+                        </span>
+                        <span className="font-mono">- ₹{totalSavings}</span>
+                      </div>
+                      <div className="flex justify-between text-cream-warm/85">
+                        <span>Items Subtotal</span>
+                        <span className="font-mono font-bold text-cream-warm">₹{subtotal}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex justify-between text-cream-warm/85">
+                      <span>Items Subtotal</span>
+                      <span className="font-mono font-bold text-cream-warm">₹{subtotal}</span>
                     </div>
                   )}
 
@@ -366,6 +377,13 @@ export const CartPage = () => {
                       ₹{subtotal}
                     </span>
                   </div>
+
+                  {totalSavings > 0 && (
+                    <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center font-medium text-xs flex items-center justify-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>You are saving ₹{totalSavings} on this order!</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Proceed to Full-Size Checkout CTA */}

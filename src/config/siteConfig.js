@@ -13,8 +13,8 @@ export const siteConfig = {
   whatsappNumber: "917358808966", 
   
   // Client Social Links & Regulatory Details
-  instagram: "@chandranaturals", // REPLACE_WITH_INSTAGRAM
-  instagramUrl: "https://instagram.com/chandranaturals",
+  instagram: "@chandra_naturals.cbe",
+  instagramUrl: "https://www.instagram.com/chandra_naturals.cbe/",
   fssaiNumber: "12423008000123", // REPLACE_WITH_FSSAI_NUMBER
   
   supportEmail: "chandranaturals1@gmail.com",

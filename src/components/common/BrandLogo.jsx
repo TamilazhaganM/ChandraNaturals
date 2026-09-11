@@ -13,9 +13,9 @@ export const BrandLogo = ({ size = "md", showText = true, className = "", asLink
   const currentSize = sizeMap[size] || sizeMap.md;
 
   const content = (
-    <div className={`flex items-center gap-3 select-none flex-shrink-0 group ${className}`}>
+    <div className={`flex items-center gap-1.5 sm:gap-2 select-none flex-shrink-0 group ${className}`}>
       {/* Brand Logo Image from assets/logo.png */}
-      <div className="relative flex-shrink-0 flex items-center justify-center">
+      <div className="relative flex-shrink-0 flex items-center justify-center -mr-0.5">
         <img
           src={logoImg}
           alt="Chandra Naturals"

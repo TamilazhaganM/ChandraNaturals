@@ -138,7 +138,7 @@ export const Navbar = () => {
                 <span className="text-gold-antique/40">•</span>
                 <span className="flex items-center gap-1.5 text-cream-warm">
                   <Package className="w-3.5 h-3.5 text-gold-antique" />
-                  <span>Delivery in 5-7 days</span>
+                  <span>Delivery in 3-5 days</span>
                 </span>
                 <span className="text-gold-antique/40">•</span>
                 <span className="flex items-center gap-1.5 text-cream-warm">

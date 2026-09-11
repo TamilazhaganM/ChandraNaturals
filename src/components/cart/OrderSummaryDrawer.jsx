@@ -14,6 +14,7 @@ export const OrderSummaryDrawer = () => {
     removeFromCart,
     clearCart,
     subtotal,
+    totalOriginalPrice,
     itemCount,
     totalSavings,
     setIsCustomerFormOpen
@@ -195,18 +196,28 @@ export const OrderSummaryDrawer = () => {
             
             {/* Price Calculations */}
             <div className="space-y-1.5 text-xs font-sans">
-              <div className="flex justify-between text-cream-warm/80">
-                <span>Subtotal ({itemCount} items)</span>
-                <span className="font-semibold font-mono text-sm">₹{subtotal}</span>
-              </div>
-              
-              {totalSavings > 0 && (
-                <div className="flex justify-between text-green-500 font-semibold">
-                  <span className="flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />
-                    Special Pack Savings
-                  </span>
-                  <span>- ₹{totalSavings}</span>
+              {totalSavings > 0 ? (
+                <>
+                  <div className="flex justify-between text-cream-warm/80">
+                    <span>Total MRP</span>
+                    <span className="font-mono text-cream-warm/60 line-through">₹{totalOriginalPrice}</span>
+                  </div>
+                  <div className="flex justify-between text-emerald-400 font-semibold">
+                    <span className="flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      Discount on MRP
+                    </span>
+                    <span>- ₹{totalSavings}</span>
+                  </div>
+                  <div className="flex justify-between text-cream-warm/80">
+                    <span>Items Subtotal</span>
+                    <span className="font-semibold font-mono text-sm">₹{subtotal}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between text-cream-warm/80">
+                  <span>Subtotal ({itemCount} items)</span>
+                  <span className="font-semibold font-mono text-sm">₹{subtotal}</span>
                 </div>
               )}
 
@@ -223,6 +234,13 @@ export const OrderSummaryDrawer = () => {
                   ₹{subtotal}
                 </span>
               </div>
+
+              {totalSavings > 0 && (
+                <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center font-medium text-[11px] flex items-center justify-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  <span>You are saving ₹{totalSavings}!</span>
+                </div>
+              )}
             </div>
 
             {/* Razorpay Checkout Button */}

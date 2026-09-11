@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { BrandLogo } from '../common/BrandLogo';
 import { siteConfig } from '../../config/siteConfig';
-import { MessageSquare, ShieldCheck, ExternalLink, QrCode } from 'lucide-react';
+import { MessageSquare, ShieldCheck, ExternalLink } from 'lucide-react';
 
 const InstagramIcon = ({ className = "w-4 h-4" }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -184,32 +184,35 @@ export const Footer = () => {
               Connect With Us
             </h4>
 
-            {/* Instagram QR Code Placeholder Box */}
-            <div className="p-3.5 rounded-2xl bg-forest-deep border border-gold-antique/35 flex flex-col items-center text-center space-y-2 shadow-sm">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-gold-antique font-sans">
+            {/* Instagram QR Code & Link Card */}
+            <a
+              href={siteConfig.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3.5 rounded-2xl bg-forest-deep border border-gold-antique/35 hover:border-gold-antique flex flex-col items-center text-center space-y-2 shadow-sm group transition-all duration-300 block"
+              title="Click or scan to visit Chandra Naturals on Instagram"
+            >
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-gold-antique font-sans group-hover:text-gold-champagne transition-colors">
                 <InstagramIcon className="w-3.5 h-3.5" />
-                <span>Instagram</span>
+                <span>Follow on Instagram</span>
               </div>
               
-              <div className="w-20 h-20 bg-[#FFFDF8] p-1.5 rounded-xl border border-gold-antique/50 flex flex-col items-center justify-center relative shadow-inner">
-                <QrCode className="w-16 h-16 text-[#0F1D12]" />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-5 h-5 rounded-full bg-forest-ink flex items-center justify-center border border-gold-antique shadow-sm">
-                    <span className="font-fraunces text-[8px] text-gold-antique font-bold">CN</span>
-                  </div>
-                </div>
+              <div className="w-24 h-24 bg-[#FFFDF8] p-1.5 rounded-xl border border-gold-antique/50 flex flex-col items-center justify-center relative shadow-inner group-hover:scale-105 transition-transform">
+                <img
+                  src="/instagram_qr.png"
+                  alt="Scan to open Chandra Naturals on Instagram"
+                  className="w-full h-full object-contain rounded-lg"
+                />
               </div>
 
-              <a
-                href={siteConfig.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-gold-antique hover:text-gold-champagne transition-colors font-sans"
-              >
+              <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-gold-antique group-hover:text-gold-champagne transition-colors font-sans">
                 <span>{siteConfig.instagram}</span>
-                <ExternalLink className="w-2.5 h-2.5" />
-              </a>
-            </div>
+                <ExternalLink className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+              <span className="text-[9px] text-cream-warm/60 block font-sans">
+                Scan with phone camera or tap to open
+              </span>
+            </a>
 
             {/* Direct WhatsApp Action */}
             <div>

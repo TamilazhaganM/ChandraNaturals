@@ -1,6 +1,5 @@
 import React from 'react';
 import { Hero } from '../components/home/Hero';
-import { TrustBadges } from '../components/home/TrustBadges';
 import { FeaturedProductsSection } from '../components/home/FeaturedProductsSection';
 import { FreshnessSection } from '../components/home/FreshnessSection';
 import { TestimonialsSection } from '../components/home/TestimonialsSection';
@@ -13,10 +12,7 @@ export const HomePage = () => {
       {/* 1. Hero Section with Banner Slider & Circular Categories */}
       <Hero />
 
-      {/* 2. Trust Badges (4 Balanced Pillars) */}
-      <TrustBadges />
-
-      {/* 3. Curated Featured Products (8 Signature Items, 2-Col Mobile / 4-Col Desktop) */}
+      {/* 2. Curated Featured Products (8 Signature Items, 2-Col Mobile / 4-Col Desktop) */}
       <FeaturedProductsSection />
 
       {/* 4. Testimonials from Customers Carousel */}

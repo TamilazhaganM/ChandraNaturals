@@ -267,6 +267,7 @@ export const CartProvider = ({ children }) => {
         clearCart,
         itemCount,
         subtotal,
+        totalOriginalPrice,
         totalSavings,
         isCartOpen,
         setIsCartOpen,
