@@ -7,7 +7,14 @@ export const FloatingCartBar = () => {
   const { itemCount, subtotal, totalSavings } = useCart();
   const location = useLocation();
 
-  if (itemCount === 0 || location.pathname.startsWith('/admin')) return null;
+  const isHiddenPath =
+    location.pathname === '/cart' ||
+    location.pathname.startsWith('/cart/') ||
+    location.pathname === '/checkout' ||
+    location.pathname.startsWith('/checkout/') ||
+    location.pathname.startsWith('/admin');
+
+  if (itemCount === 0 || isHiddenPath) return null;
 
   return (
     <aside
