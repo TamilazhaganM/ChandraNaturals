@@ -46,11 +46,7 @@ export const OrderSummaryDrawer = () => {
 
   const handleProceedToDetails = () => {
     setIsCartOpen(false);
-    if (!isAuthenticated) {
-      navigate('/login?redirect=/checkout');
-    } else {
-      setIsCustomerFormOpen(true);
-    }
+    navigate('/checkout');
   };
 
   return (

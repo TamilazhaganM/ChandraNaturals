@@ -6,12 +6,21 @@ import { VegMark } from '../components/common/VegMark';
 import { siteConfig } from '../config/siteConfig';
 import { generateWhatsAppOrderUrl } from '../utils/whatsapp';
 import { orderAPI, paymentAPI } from '../services/api';
+import { addressService } from '../services/addressService';
 import confetti from 'canvas-confetti';
 import {
   ShieldCheck, Lock, CreditCard, Truck, CheckCircle2, ArrowLeft,
   ArrowRight, Sparkles, ShoppingBag, MapPin, User, Phone, Mail,
-  MessageSquare, AlertCircle, FileText, Check
+  MessageSquare, AlertCircle, FileText, Check, Plus, Edit3, Home,
+  Building2, ChevronRight, X
 } from 'lucide-react';
+
+const INDIAN_STATES = [
+  'Tamil Nadu', 'Karnataka', 'Kerala', 'Andhra Pradesh', 'Telangana',
+  'Maharashtra', 'Delhi', 'Gujarat', 'West Bengal', 'Rajasthan',
+  'Uttar Pradesh', 'Punjab', 'Haryana', 'Madhya Pradesh', 'Bihar',
+  'Odisha', 'Goa', 'Assam', 'Other'
+];
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TYc3JTxRc18uEb';
 
@@ -30,36 +39,39 @@ export const CheckoutPage = () => {
   const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect unauthenticated customers to login with redirect back to /checkout
+  // Guest or authenticated checkout: both are supported smoothly
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      navigate('/login?redirect=/checkout');
+    // Sync invoice email with user if logged in
+    if (user?.email) {
+      setInvoiceEmail(prev => prev || user.email);
     }
-  }, [isAuthenticated, loading, navigate]);
+  }, [user]);
 
-  // Delivery / customer form data
-  const [formData, setFormData] = useState({
-    name: user?.name || '',
+  // Address management state
+  const [addresses, setAddresses] = useState([]);
+  const [addressesLoading, setAddressesLoading] = useState(true);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState(null);
+  const [addressSubmitting, setAddressSubmitting] = useState(false);
+
+  // Address form fields (for adding/editing)
+  const [addressForm, setAddressForm] = useState({
+    fullName: user?.name || '',
     phone: user?.phone || '',
-    email: user?.email || '',
-    address: '',
+    addressLine: '',
+    landmark: '',
     city: 'Chennai',
     state: 'Tamil Nadu',
     pincode: '',
-    notes: ''
+    addressType: 'home', // 'home' | 'work' | 'other'
+    isDefault: false,
+    saveForFuture: true
   });
 
-  // Sync user profile data if user changes or logs in
-  useEffect(() => {
-    if (user) {
-      setFormData(prev => ({
-        ...prev,
-        name: prev.name || user.name || '',
-        phone: prev.phone || user.phone || '',
-        email: prev.email || user.email || ''
-      }));
-    }
-  }, [user]);
+  // Additional order fields
+  const [orderNotes, setOrderNotes] = useState('');
+  const [invoiceEmail, setInvoiceEmail] = useState(user?.email || '');
 
   const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' | 'cod' | 'whatsapp'
   const [errors, setErrors] = useState({});
@@ -71,61 +83,217 @@ export const CheckoutPage = () => {
   const shippingFee = cart.length === 0 ? 0 : isFreeShipping ? 0 : 99;
   const grandTotal = subtotal + shippingFee;
 
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Please enter your full name';
-    if (!formData.phone.trim() || formData.phone.trim().length < 10) {
-      newErrors.phone = 'Please enter a valid 10-digit mobile number';
-    }
-    if (!formData.email.trim() || !formData.email.includes('@')) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-    if (!formData.address.trim()) newErrors.address = 'Please enter your street / flat delivery address';
-    if (!formData.city.trim()) newErrors.city = 'Please enter your city';
-    if (!formData.pincode.trim() || formData.pincode.trim().length < 6) {
-      newErrors.pincode = 'Please enter a valid 6-digit postal pincode';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  // Address toast message state
+  const [addressToast, setAddressToast] = useState(null);
+  const showAddressToast = (msg, type = 'info') => {
+    setAddressToast({ msg, type });
+    setTimeout(() => setAddressToast(null), 5000);
   };
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: null }));
+  // Load user saved addresses - guarantees default address is displayed & selected
+  const fetchAddresses = async (preferredId = null) => {
+    setAddressesLoading(true);
+    try {
+      const userAddrs = await addressService.getUserAddresses(user);
+      setAddresses(userAddrs || []);
+      if (userAddrs && userAddrs.length > 0) {
+        const targetId = preferredId || (selectedAddressId && userAddrs.some(a => a._id === selectedAddressId) ? selectedAddressId : null);
+        const def = (targetId && userAddrs.find(a => a._id === targetId)) || userAddrs.find(a => a.isDefault) || userAddrs[0];
+        setSelectedAddressId(def._id);
+        setIsAddingAddress(false);
+        return def;
+      }
+    } catch (err) {
+      console.warn('Could not load user addresses:', err);
+      return null;
+    } finally {
+      setAddressesLoading(false);
+    }
+  };
+
+  // 1-Click Fetch & Apply Default / Saved Address
+  const handleFetchDefaultAddress = async () => {
+    setAddressesLoading(true);
+    try {
+      const userAddrs = await addressService.getUserAddresses(user);
+      setAddresses(userAddrs || []);
+      const def = userAddrs.find(a => a.isDefault) || userAddrs[0];
+      if (def) {
+        setSelectedAddressId(def._id);
+        setIsAddingAddress(false);
+        setEditingAddressId(null);
+        showAddressToast(`Default address loaded: ${def.fullName} (${def.city}, ${def.pincode})`, 'success');
+      }
+    } catch (err) {
+      showAddressToast('Could not fetch saved address.', 'error');
+    } finally {
+      setAddressesLoading(false);
+    }
+  };
+
+  // Auto-fill form from user profile
+  const handleAutoFillProfile = () => {
+    const def = addressService.getDefaultAddress(user);
+    setAddressForm(prev => ({
+      ...prev,
+      fullName: user?.name || def?.fullName || prev.fullName || '',
+      phone: user?.phone || def?.phone || prev.phone || '',
+      addressLine: user?.address || def?.addressLine || prev.addressLine || '',
+      city: user?.city || def?.city || prev.city || 'Chennai',
+      state: user?.state || def?.state || prev.state || 'Tamil Nadu',
+      pincode: user?.pincode || def?.pincode || prev.pincode || ''
+    }));
+    showAddressToast('Auto-filled contact details from your account profile.', 'info');
+  };
+
+  // Automatically fetch on mount and on user session change
+  useEffect(() => {
+    fetchAddresses();
+    if (user) {
+      setInvoiceEmail(prev => prev || user.email || '');
+      setAddressForm(prev => ({
+        ...prev,
+        fullName: prev.fullName || user.name || '',
+        phone: prev.phone || user.phone || ''
+      }));
+    }
+  }, [user]);
+
+  // Open add address form
+  const openAddNewAddress = () => {
+    setEditingAddressId(null);
+    setAddressForm({
+      fullName: user?.name || '',
+      phone: user?.phone || '',
+      addressLine: '',
+      landmark: '',
+      city: 'Chennai',
+      state: 'Tamil Nadu',
+      pincode: '',
+      addressType: 'home',
+      isDefault: addresses.length === 0,
+      saveForFuture: true
+    });
+    setErrors({});
+    setIsAddingAddress(true);
+  };
+
+  // Open edit address form
+  const openEditAddress = (addr) => {
+    setEditingAddressId(addr._id);
+    setAddressForm({
+      fullName: addr.fullName || '',
+      phone: addr.phone || '',
+      addressLine: addr.addressLine || '',
+      landmark: addr.landmark || '',
+      city: addr.city || '',
+      state: addr.state || 'Tamil Nadu',
+      pincode: addr.pincode || '',
+      addressType: addr.addressType || 'home',
+      isDefault: Boolean(addr.isDefault),
+      saveForFuture: true
+    });
+    setErrors({});
+    setIsAddingAddress(true);
+  };
+
+  // Validate address form
+  const validateAddressForm = () => {
+    const errs = {};
+    if (!addressForm.fullName.trim()) errs.fullName = 'Recipient full name is required';
+    const cleanPhone = String(addressForm.phone || '').replace(/\D/g, '').slice(-10);
+    if (cleanPhone.length !== 10) errs.phone = 'Valid 10-digit mobile number required';
+    if (!addressForm.addressLine.trim()) errs.addressLine = 'Street / House / Building address required';
+    if (!addressForm.city.trim()) errs.city = 'City is required';
+    const cleanPin = String(addressForm.pincode || '').replace(/\D/g, '').slice(0, 6);
+    if (cleanPin.length !== 6) errs.pincode = 'Valid 6-digit postal PIN code required';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  // Save address action
+  const handleSaveAddress = async (e) => {
+    if (e) e.preventDefault();
+    if (!validateAddressForm()) return false;
+
+    setAddressSubmitting(true);
+    try {
+      if (addressForm.saveForFuture) {
+        const saved = await addressService.saveAddress(user, addressForm, editingAddressId);
+        const updated = await addressService.getUserAddresses(user);
+        setAddresses(updated);
+        setSelectedAddressId(saved._id);
+      } else {
+        const tempId = `temp_${Date.now()}`;
+        const tempAddr = { ...addressForm, _id: tempId };
+        setAddresses(prev => [tempAddr, ...prev]);
+        setSelectedAddressId(tempId);
+      }
+      setIsAddingAddress(false);
+      setEditingAddressId(null);
+      return true;
+    } catch (err) {
+      alert('Could not save address: ' + (err.message || 'Error'));
+      return false;
+    } finally {
+      setAddressSubmitting(false);
     }
   };
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+
     if (cart.length === 0) {
       alert('Your cart is empty. Please add items to checkout.');
       navigate('/shop');
       return;
     }
 
+    // Determine active delivery address
+    let activeAddress = null;
+
+    if (isAddingAddress) {
+      const saved = await handleSaveAddress();
+      if (!saved) return;
+      activeAddress = addressForm;
+    } else {
+      activeAddress = addresses.find(a => a._id === selectedAddressId) || addresses[0];
+    }
+
+    if (!activeAddress || !activeAddress.fullName || !activeAddress.addressLine) {
+      alert('Please select or enter a valid delivery address to proceed.');
+      setIsAddingAddress(true);
+      return;
+    }
+
+    const cleanEmail = (invoiceEmail || user?.email || '').trim();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      setErrors(prev => ({ ...prev, email: 'Please provide a valid email address for invoice' }));
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
-      // 1. Create order on backend with server-side price calculation
+      const shippingAddress = {
+        fullName: activeAddress.fullName.trim(),
+        phone: String(activeAddress.phone).replace(/\D/g, '').slice(-10),
+        email: cleanEmail,
+        addressLine: activeAddress.addressLine.trim(),
+        city: activeAddress.city.trim(),
+        state: (activeAddress.state || 'Tamil Nadu').trim(),
+        pincode: String(activeAddress.pincode).replace(/\D/g, '').slice(0, 6),
+        landmark: (activeAddress.landmark || '').trim()
+      };
+
       const orderPayload = {
         items: cart.map(item => ({
           productId: item.product.id || item.product._id,
           quantity: item.quantity
         })),
-        shippingAddress: {
-          fullName: formData.name.trim(),
-          phone: formData.phone.trim(),
-          email: formData.email.trim(),
-          addressLine: formData.address.trim(),
-          city: formData.city.trim(),
-          state: formData.state.trim(),
-          pincode: formData.pincode.trim(),
-          landmark: ''
-        },
+        shippingAddress,
         paymentMethod,
-        notes: formData.notes
+        notes: orderNotes
       };
 
       const orderRes = await orderAPI.createOrder(orderPayload);
@@ -135,6 +303,17 @@ export const CheckoutPage = () => {
       if (!serverOrder) {
         throw new Error('Order creation failed on server');
       }
+
+      const customerSummary = {
+        name: shippingAddress.fullName,
+        phone: shippingAddress.phone,
+        email: shippingAddress.email,
+        address: shippingAddress.addressLine,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        pincode: shippingAddress.pincode,
+        landmark: shippingAddress.landmark
+      };
 
       // Method A: Razorpay Online Payment
       if (paymentMethod === 'razorpay') {
@@ -152,11 +331,11 @@ export const CheckoutPage = () => {
           currency: 'INR',
           name: siteConfig.brandName,
           description: `Artisanal Order #${serverOrder.orderNumber}`,
-          image: '/favicon.svg',
+          image: '/logo.png',
           prefill: {
-            name: formData.name,
-            email: formData.email,
-            contact: formData.phone
+            name: customerSummary.name,
+            email: customerSummary.email,
+            contact: customerSummary.phone
           },
           notes: {
             orderNumber: serverOrder.orderNumber,
@@ -181,7 +360,7 @@ export const CheckoutPage = () => {
                 paymentId: response.razorpay_payment_id,
                 paymentMethod: 'Online Payment (Razorpay)',
                 items: serverOrder.items,
-                customer: formData,
+                customer: customerSummary,
                 total: serverOrder.total
               });
             } catch (verErr) {
@@ -213,7 +392,7 @@ export const CheckoutPage = () => {
 
       // Method B: WhatsApp Direct Order
       if (paymentMethod === 'whatsapp') {
-        const waUrl = generateWhatsAppOrderUrl(cart, formData, serverOrder.total);
+        const waUrl = generateWhatsAppOrderUrl(cart, customerSummary, serverOrder.total);
         setIsProcessing(false);
         window.open(waUrl, '_blank', 'noopener,noreferrer');
         finishOrderSuccess({
@@ -221,7 +400,7 @@ export const CheckoutPage = () => {
           paymentId: 'WhatsApp-Confirmation',
           paymentMethod: 'WhatsApp Kitchen Order',
           items: serverOrder.items,
-          customer: formData,
+          customer: customerSummary,
           total: serverOrder.total
         });
         return;
@@ -235,7 +414,7 @@ export const CheckoutPage = () => {
           paymentId: 'COD-Verified',
           paymentMethod: 'Cash on Delivery',
           items: serverOrder.items,
-          customer: formData,
+          customer: customerSummary,
           total: serverOrder.total
         });
         return;
@@ -447,157 +626,582 @@ export const CheckoutPage = () => {
           <div className="lg:col-span-7 space-y-8">
             <form onSubmit={handlePlaceOrder} className="space-y-8">
               
-              {/* Step 1: Shipping & Delivery Info Card */}
+              {/* Step 1: Shipping & Delivery Destination Card */}
               <div className="rounded-2xl bg-forest-deep border border-gold-antique/30 p-6 sm:p-7 shadow-xl space-y-5">
-                <div className="flex items-center justify-between border-b border-gold-antique/20 pb-3">
+                {/* Step 1 Header with Prominent Fetch Default Button */}
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold-antique/20 pb-3">
                   <div className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-full bg-gold-antique text-forest-ink font-bold flex items-center justify-center text-xs font-sans">
                       1
                     </div>
                     <h2 className="font-fraunces text-xl font-bold text-cream-warm">
-                      Shipping & Delivery Details
+                      Shipping & Delivery Destination
                     </h2>
                   </div>
-                  {user ? (
-                    <span className="text-[11px] text-emerald-400 font-medium font-sans">
-                      Logged in as {user.name}
-                    </span>
-                  ) : (
-                    <Link to="/auth" className="text-[11px] text-gold-antique hover:underline font-sans">
-                      Have an account? Log in
-                    </Link>
-                  )}
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleFetchDefaultAddress}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gold-antique/15 hover:bg-gold-antique text-gold-antique hover:text-forest-ink border border-gold-antique/35 font-bold font-sans text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+                      title="Fetch and apply your default saved address"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Fetch Saved Address (Default)</span>
+                    </button>
+
+                    {user ? (
+                      <span className="text-[11px] text-emerald-400 font-medium font-sans flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Account:</span> {user.name}
+                      </span>
+                    ) : (
+                      <Link to="/auth" className="text-[11px] text-gold-antique hover:underline font-sans">
+                        Log in
+                      </Link>
+                    )}
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans text-xs">
-                  {/* Full Name */}
-                  <div className="sm:col-span-2 space-y-1.5">
-                    <label className="text-cream-warm/85 font-semibold flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-gold-antique" />
-                      <span>Full Name *</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Anandhi Sundaram"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-xl bg-forest-ink border ${
-                        errors.name ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
-                      } text-cream-warm focus:outline-none font-sans text-sm`}
-                    />
-                    {errors.name && <p className="text-red-400 text-[11px]">{errors.name}</p>}
+                {/* View Mode Switcher Tabs */}
+                <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 rounded-xl bg-forest-ink/60 border border-gold-antique/20 font-sans text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (addresses.length > 0) {
+                          setIsAddingAddress(false);
+                          setEditingAddressId(null);
+                        } else {
+                          handleFetchDefaultAddress();
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                        !isAddingAddress && addresses.length > 0
+                          ? 'bg-gold-antique text-forest-ink shadow-sm'
+                          : 'text-cream-warm/75 hover:text-gold-antique'
+                      }`}
+                    >
+                      <Home className="w-3.5 h-3.5" />
+                      <span>Saved Addresses ({addresses.length})</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={openAddNewAddress}
+                      className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                        isAddingAddress && !editingAddressId
+                          ? 'bg-gold-antique text-forest-ink shadow-sm'
+                          : 'text-cream-warm/75 hover:text-gold-antique'
+                      }`}
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>+ Add New Address</span>
+                    </button>
                   </div>
 
-                  {/* Mobile Number */}
-                  <div className="space-y-1.5">
-                    <label className="text-cream-warm/85 font-semibold flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5 text-gold-antique" />
-                      <span>Mobile Number (WhatsApp) *</span>
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="10-digit mobile number"
-                      maxLength={10}
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-xl bg-forest-ink border ${
-                        errors.phone ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
-                      } text-cream-warm focus:outline-none font-sans text-sm`}
-                    />
-                    {errors.phone && <p className="text-red-400 text-[11px]">{errors.phone}</p>}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleFetchDefaultAddress}
+                    className="text-gold-antique hover:underline text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    <span>Fetch / Auto-select Default</span>
+                  </button>
+                </div>
 
-                  {/* Email Address */}
+                {/* Toast alert banner if active */}
+                {addressToast && (
+                  <div className={`p-3 rounded-xl border flex items-center justify-between text-xs font-sans transition-all animate-fadeIn ${
+                    addressToast.type === 'success'
+                      ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-200'
+                      : addressToast.type === 'error'
+                      ? 'bg-rose-950/70 border-rose-500/40 text-rose-200'
+                      : 'bg-gold-antique/15 border-gold-antique/30 text-cream-warm'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      {addressToast.type === 'success' ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      ) : (
+                        <MapPin className="w-4 h-4 text-gold-antique shrink-0" />
+                      )}
+                      <span>{addressToast.msg}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAddressToast(null)}
+                      className="text-xs opacity-70 hover:opacity-100 cursor-pointer ml-2"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
+                {/* Content: loading skeleton OR saved addresses OR add/edit address form */}
+                {addressesLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 animate-pulse">
+                    {[1, 2].map(n => (
+                      <div key={n} className="h-36 rounded-2xl bg-forest-ink/60 border border-gold-antique/20" />
+                    ))}
+                  </div>
+                ) : !isAddingAddress && addresses.length > 0 ? (
+                  /* SAVED ADDRESSES SELECTOR */
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-cream-warm/80 font-sans">
+                        Select delivery address ({addresses.length} saved):
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleFetchDefaultAddress}
+                          className="text-[11px] text-gold-antique hover:underline font-medium font-sans flex items-center gap-1 cursor-pointer"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>Fetch Default</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={openAddNewAddress}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold-antique text-forest-ink font-bold font-sans text-xs hover:bg-gold-champagne transition-all shadow-md active:scale-95 cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add New Address</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Grid of Saved Addresses */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      {addresses.map((addr) => {
+                        const isSelected = selectedAddressId === addr._id;
+                        return (
+                          <div
+                            key={addr._id}
+                            onClick={() => setSelectedAddressId(addr._id)}
+                            className={`relative rounded-2xl p-4 transition-all cursor-pointer flex flex-col justify-between border-2 ${
+                              isSelected
+                                ? 'border-gold-antique bg-gold-antique/10 shadow-gold-glow ring-1 ring-gold-antique/40'
+                                : 'border-gold-antique/20 bg-forest-ink/60 hover:border-gold-antique/40 hover:bg-forest-ink/80'
+                            }`}
+                          >
+                            <div className="space-y-2">
+                              {/* Header row: Radio, type, default */}
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                                    isSelected ? 'border-gold-antique bg-gold-antique' : 'border-gold-antique/40'
+                                  }`}>
+                                    {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-forest-ink" />}
+                                  </div>
+                                  <span className="font-serif text-sm font-bold text-cream-warm">
+                                    {addr.fullName}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-forest-deep border border-gold-antique/30 text-gold-antique font-sans">
+                                    {addr.addressType === 'work' ? (
+                                      <Building2 className="w-2.5 h-2.5" />
+                                    ) : (
+                                      <Home className="w-2.5 h-2.5" />
+                                    )}
+                                    {addr.addressType || 'Home'}
+                                  </span>
+                                  {addr.isDefault && (
+                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                                      Default
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Address Details */}
+                              <div className="text-xs text-cream-warm/80 font-sans space-y-0.5 pl-6 leading-relaxed">
+                                <p className="line-clamp-2">{addr.addressLine}</p>
+                                {addr.landmark && (
+                                  <p className="text-[11px] text-cream-warm/60">Landmark: {addr.landmark}</p>
+                                )}
+                                <p className="font-medium text-cream-warm">
+                                  {addr.city}, {addr.state} - <span className="font-mono text-gold-antique font-bold">{addr.pincode}</span>
+                                </p>
+                                <p className="text-cream-warm/70 pt-0.5 font-mono text-[11px]">
+                                  Mobile: +91 {addr.phone}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Bottom Card Action / Edit */}
+                            <div className="pt-3 mt-3 border-t border-gold-antique/15 flex items-center justify-between pl-6 text-xs font-sans">
+                              {isSelected ? (
+                                <span className="inline-flex items-center gap-1 text-gold-antique font-bold text-[11px]">
+                                  <Check className="w-3.5 h-3.5" />
+                                  Deliver to this address
+                                </span>
+                              ) : (
+                                <span className="text-cream-warm/50 text-[11px]">
+                                  Click to choose
+                                </span>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openEditAddress(addr);
+                                }}
+                                className="p-1.5 rounded-lg bg-forest-deep hover:bg-forest-moss/40 text-cream-warm/70 hover:text-gold-antique transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                                title="Edit Address"
+                              >
+                                <Edit3 className="w-3 h-3" />
+                                <span>Edit</span>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  /* ADD OR EDIT ADDRESS FORM */
+                  <div className="space-y-4 font-sans">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-gold-antique/15">
+                      <h3 className="font-fraunces text-base font-bold text-cream-warm flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-gold-antique" />
+                        <span>
+                          {editingAddressId ? 'Edit Delivery Address' : addresses.length > 0 ? 'Add New Delivery Address' : 'Enter Delivery Address'}
+                        </span>
+                      </h3>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleAutoFillProfile}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gold-antique/15 hover:bg-gold-antique text-gold-antique hover:text-forest-ink text-[11px] font-semibold transition-all cursor-pointer border border-gold-antique/30"
+                          title="Auto-fill contact details from your profile"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>Auto-fill Profile</span>
+                        </button>
+
+                        {addresses.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAddingAddress(false);
+                              setEditingAddressId(null);
+                            }}
+                            className="inline-flex items-center gap-1 text-xs text-gold-antique hover:underline cursor-pointer ml-1"
+                          >
+                            <ArrowLeft className="w-3.5 h-3.5" />
+                            <span>Use Saved Address</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {addresses.length === 0 && (
+                      <div className="p-3.5 rounded-xl bg-gold-antique/10 border border-gold-antique/25 flex items-start gap-2.5 text-xs text-cream-warm/85">
+                        <Sparkles className="w-4 h-4 text-gold-antique shrink-0 mt-0.5" />
+                        <p>
+                          You don't have a saved address yet. Please enter your delivery address below. We'll save it to your account for fast, 1-click checkout on future orders!
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                      {/* Full Name */}
+                      <div className="sm:col-span-2 space-y-1.5">
+                        <label className="text-cream-warm/85 font-semibold flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5 text-gold-antique" />
+                          <span>Recipient Full Name *</span>
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Anandhi Sundaram"
+                          value={addressForm.fullName}
+                          onChange={(e) => {
+                            setAddressForm(prev => ({ ...prev, fullName: e.target.value }));
+                            if (errors.fullName) setErrors(prev => ({ ...prev, fullName: null }));
+                          }}
+                          className={`w-full px-4 py-2.5 rounded-xl bg-forest-ink border ${
+                            errors.fullName ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
+                          } text-cream-warm focus:outline-none font-sans text-sm`}
+                        />
+                        {errors.fullName && <p className="text-red-400 text-[11px]">{errors.fullName}</p>}
+                      </div>
+
+                      {/* Mobile Number */}
+                      <div className="space-y-1.5">
+                        <label className="text-cream-warm/85 font-semibold flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 text-gold-antique" />
+                          <span>Mobile Number (10 digits) *</span>
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-2.5 text-cream-warm/60 font-mono text-sm">+91</span>
+                          <input
+                            type="tel"
+                            placeholder="9876543210"
+                            maxLength={10}
+                            value={addressForm.phone}
+                            onChange={(e) => {
+                              setAddressForm(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }));
+                              if (errors.phone) setErrors(prev => ({ ...prev, phone: null }));
+                            }}
+                            className={`w-full pl-13 pr-4 py-2.5 rounded-xl bg-forest-ink border ${
+                              errors.phone ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
+                            } text-cream-warm focus:outline-none font-mono text-sm`}
+                          />
+                        </div>
+                        {errors.phone && <p className="text-red-400 text-[11px]">{errors.phone}</p>}
+                      </div>
+
+                      {/* Address Type Selector */}
+                      <div className="space-y-1.5">
+                        <label className="text-cream-warm/85 font-semibold block">Address Type</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { id: 'home', label: 'Home', icon: Home },
+                            { id: 'work', label: 'Work', icon: Building2 },
+                            { id: 'other', label: 'Other', icon: MapPin }
+                          ].map(type => {
+                            const Icon = type.icon;
+                            const isSelected = addressForm.addressType === type.id;
+                            return (
+                              <button
+                                key={type.id}
+                                type="button"
+                                onClick={() => setAddressForm(prev => ({ ...prev, addressType: type.id }))}
+                                className={`py-2 px-3 rounded-xl border flex items-center justify-center gap-1.5 font-sans text-xs transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'border-gold-antique bg-gold-antique text-forest-ink font-bold shadow-sm'
+                                    : 'border-gold-antique/25 bg-forest-ink text-cream-warm hover:border-gold-antique/50'
+                                }`}
+                              >
+                                <Icon className="w-3.5 h-3.5" />
+                                <span>{type.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Street / Flat Address */}
+                      <div className="sm:col-span-2 space-y-1.5">
+                        <label className="text-cream-warm/85 font-semibold flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-gold-antique" />
+                          <span>Flat / House No., Building, Street & Area *</span>
+                        </label>
+                        <textarea
+                          rows={2}
+                          placeholder="e.g. Flat 4B, Heritage Enclave, Gandhi Road, Adyar"
+                          value={addressForm.addressLine}
+                          onChange={(e) => {
+                            setAddressForm(prev => ({ ...prev, addressLine: e.target.value }));
+                            if (errors.addressLine) setErrors(prev => ({ ...prev, addressLine: null }));
+                          }}
+                          className={`w-full px-4 py-2.5 rounded-xl bg-forest-ink border ${
+                            errors.addressLine ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
+                          } text-cream-warm focus:outline-none font-sans text-sm resize-none`}
+                        />
+                        {errors.addressLine && <p className="text-red-400 text-[11px]">{errors.addressLine}</p>}
+                      </div>
+
+                      {/* Landmark */}
+                      <div className="sm:col-span-2 space-y-1.5">
+                        <label className="text-cream-warm/75">Nearby Landmark / Instructions (Optional)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Near Vinayagar Temple, Behind Metro Station"
+                          value={addressForm.landmark}
+                          onChange={(e) => setAddressForm(prev => ({ ...prev, landmark: e.target.value }))}
+                          className="w-full px-4 py-2 rounded-xl bg-forest-ink border border-gold-antique/25 focus:border-gold-antique text-cream-warm focus:outline-none font-sans text-xs"
+                        />
+                      </div>
+
+                      {/* City */}
+                      <div className="space-y-1.5">
+                        <label className="text-cream-warm/85 font-semibold">City *</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Chennai"
+                          value={addressForm.city}
+                          onChange={(e) => {
+                            setAddressForm(prev => ({ ...prev, city: e.target.value }));
+                            if (errors.city) setErrors(prev => ({ ...prev, city: null }));
+                          }}
+                          className={`w-full px-4 py-2.5 rounded-xl bg-forest-ink border ${
+                            errors.city ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
+                          } text-cream-warm focus:outline-none font-sans text-sm`}
+                        />
+                        {errors.city && <p className="text-red-400 text-[11px]">{errors.city}</p>}
+                      </div>
+
+                      {/* State */}
+                      <div className="space-y-1.5">
+                        <label className="text-cream-warm/85 font-semibold">State *</label>
+                        <select
+                          value={addressForm.state}
+                          onChange={(e) => setAddressForm(prev => ({ ...prev, state: e.target.value }))}
+                          className="w-full px-4 py-2.5 rounded-xl bg-forest-ink border border-gold-antique/30 focus:border-gold-antique text-cream-warm focus:outline-none font-sans text-sm cursor-pointer"
+                        >
+                          {INDIAN_STATES.map(st => (
+                            <option key={st} value={st} className="bg-forest-deep text-cream-warm">
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Pincode */}
+                      <div className="space-y-1.5">
+                        <label className="text-cream-warm/85 font-semibold">Postal Pincode (6 digits) *</label>
+                        <input
+                          type="text"
+                          placeholder="6-digit pincode"
+                          maxLength={6}
+                          value={addressForm.pincode}
+                          onChange={(e) => {
+                            setAddressForm(prev => ({ ...prev, pincode: e.target.value.replace(/\D/g, '') }));
+                            if (errors.pincode) setErrors(prev => ({ ...prev, pincode: null }));
+                          }}
+                          className={`w-full px-4 py-2.5 rounded-xl bg-forest-ink border ${
+                            errors.pincode ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
+                          } text-cream-warm focus:outline-none font-mono text-sm`}
+                        />
+                        {errors.pincode && <p className="text-red-400 text-[11px]">{errors.pincode}</p>}
+                      </div>
+
+                      {/* Checkboxes for saving and default */}
+                      <div className="sm:col-span-2 pt-2 space-y-2">
+                        <label className="flex items-center gap-2.5 cursor-pointer text-xs text-cream-warm/85">
+                          <input
+                            type="checkbox"
+                            checked={addressForm.saveForFuture}
+                            onChange={(e) => setAddressForm(prev => ({ ...prev, saveForFuture: e.target.checked }))}
+                            className="w-4 h-4 rounded text-gold-antique accent-gold-antique cursor-pointer"
+                          />
+                          <span>Save this address to my account for faster 1-click checkout next time</span>
+                        </label>
+
+                        <label className="flex items-center gap-2.5 cursor-pointer text-xs text-cream-warm/85">
+                          <input
+                            type="checkbox"
+                            checked={addressForm.isDefault}
+                            onChange={(e) => setAddressForm(prev => ({ ...prev, isDefault: e.target.checked }))}
+                            className="w-4 h-4 rounded text-gold-antique accent-gold-antique cursor-pointer"
+                          />
+                          <span>Make this my default delivery address</span>
+                        </label>
+                      </div>
+
+                      {/* Save Address Buttons */}
+                      <div className="sm:col-span-2 pt-3 flex flex-wrap items-center gap-3">
+                        <button
+                          type="button"
+                          disabled={addressSubmitting}
+                          onClick={handleSaveAddress}
+                          className="px-6 py-2.5 rounded-xl bg-gold-antique text-forest-ink font-bold font-sans text-xs uppercase tracking-wider hover:bg-gold-champagne transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer flex items-center gap-2"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>{addressSubmitting ? 'Saving Address...' : 'Save & Deliver Here'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleAutoFillProfile}
+                          className="px-4 py-2.5 rounded-xl border border-gold-antique/30 text-gold-antique hover:bg-gold-antique/10 text-xs font-sans cursor-pointer flex items-center gap-1.5 transition-colors"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>Auto-fill Profile</span>
+                        </button>
+
+                        {addresses.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAddingAddress(false);
+                              setEditingAddressId(null);
+                            }}
+                            className="px-4 py-2.5 rounded-xl text-cream-warm/70 hover:text-cream-warm text-xs font-sans cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Confirmed Delivery Destination Badge */}
+                {!isAddingAddress && addresses.length > 0 && (() => {
+                  const selectedAddr = addresses.find(a => a._id === selectedAddressId) || addresses[0];
+                  if (!selectedAddr) return null;
+                  return (
+                    <div className="p-3.5 rounded-xl bg-forest-ink/90 border border-gold-antique/35 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-sans shadow-inner">
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                          <Check className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <span className="text-[10px] uppercase tracking-wider text-gold-antique font-bold block">
+                            Confirmed Delivery Destination
+                          </span>
+                          <p className="font-semibold text-cream-warm">
+                            {selectedAddr.fullName} · +91 {selectedAddr.phone}
+                          </p>
+                          <p className="text-cream-warm/75 text-[11px] line-clamp-1">
+                            {selectedAddr.addressLine}, {selectedAddr.city}, {selectedAddr.state} - {selectedAddr.pincode}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={openAddNewAddress}
+                        className="text-[11px] text-gold-antique hover:underline whitespace-nowrap cursor-pointer flex items-center gap-1 font-semibold self-end sm:self-auto"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>Add / Switch Address</span>
+                      </button>
+                    </div>
+                  );
+                })()}
+
+                {/* Invoice Email & Special Courier Remarks */}
+                <div className="pt-4 border-t border-gold-antique/15 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
                   <div className="space-y-1.5">
                     <label className="text-cream-warm/85 font-semibold flex items-center gap-1.5">
                       <Mail className="w-3.5 h-3.5 text-gold-antique" />
-                      <span>Email Address (For Invoice) *</span>
+                      <span>Invoice & Order Updates Email *</span>
                     </label>
                     <input
                       type="email"
                       placeholder="name@example.com"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-xl bg-forest-ink border ${
+                      value={invoiceEmail}
+                      onChange={(e) => {
+                        setInvoiceEmail(e.target.value);
+                        if (errors.email) setErrors(prev => ({ ...prev, email: null }));
+                      }}
+                      className={`w-full px-4 py-2 rounded-xl bg-forest-ink border ${
                         errors.email ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
-                      } text-cream-warm focus:outline-none font-sans text-sm`}
+                      } text-cream-warm focus:outline-none font-sans text-xs`}
                     />
                     {errors.email && <p className="text-red-400 text-[11px]">{errors.email}</p>}
                   </div>
 
-                  {/* Street / Flat Address */}
-                  <div className="sm:col-span-2 space-y-1.5">
-                    <label className="text-cream-warm/85 font-semibold flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-gold-antique" />
-                      <span>Door No, Building, Street / Area *</span>
+                  <div className="space-y-1.5">
+                    <label className="text-cream-warm/75 flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-gold-antique" />
+                      <span>Courier Notes / Special Remarks (Optional)</span>
                     </label>
-                    <textarea
-                      rows={2}
-                      placeholder="e.g. Flat 4B, Heritage Enclave, Gandhi Road, Adyar"
-                      value={formData.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-xl bg-forest-ink border ${
-                        errors.address ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
-                      } text-cream-warm focus:outline-none font-sans text-sm resize-none`}
-                    />
-                    {errors.address && <p className="text-red-400 text-[11px]">{errors.address}</p>}
-                  </div>
-
-                  {/* City */}
-                  <div className="space-y-1.5">
-                    <label className="text-cream-warm/85 font-semibold">City *</label>
                     <input
                       type="text"
-                      placeholder="e.g. Chennai"
-                      value={formData.city}
-                      onChange={(e) => handleInputChange('city', e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-xl bg-forest-ink border ${
-                        errors.city ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
-                      } text-cream-warm focus:outline-none font-sans text-sm`}
-                    />
-                    {errors.city && <p className="text-red-400 text-[11px]">{errors.city}</p>}
-                  </div>
-
-                  {/* Pincode */}
-                  <div className="space-y-1.5">
-                    <label className="text-cream-warm/85 font-semibold">Postal Pincode *</label>
-                    <input
-                      type="text"
-                      placeholder="6-digit pincode"
-                      maxLength={6}
-                      value={formData.pincode}
-                      onChange={(e) => handleInputChange('pincode', e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-xl bg-forest-ink border ${
-                        errors.pincode ? 'border-red-400' : 'border-gold-antique/30 focus:border-gold-antique'
-                      } text-cream-warm focus:outline-none font-sans text-sm`}
-                    />
-                    {errors.pincode && <p className="text-red-400 text-[11px]">{errors.pincode}</p>}
-                  </div>
-
-                  {/* State */}
-                  <div className="sm:col-span-2 space-y-1.5">
-                    <label className="text-cream-warm/85 font-semibold">State / Region</label>
-                    <input
-                      type="text"
-                      placeholder="Tamil Nadu"
-                      value={formData.state}
-                      onChange={(e) => handleInputChange('state', e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-forest-ink border border-gold-antique/30 focus:border-gold-antique text-cream-warm focus:outline-none font-sans text-sm"
-                    />
-                  </div>
-
-                  {/* Order Notes / Landmark */}
-                  <div className="sm:col-span-2 space-y-1.5">
-                    <label className="text-cream-warm/75">Delivery Instructions / Landmark (Optional)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Near Vinayagar Temple, ring bell on 2nd floor"
-                      value={formData.notes}
-                      onChange={(e) => handleInputChange('notes', e.target.value)}
+                      placeholder="e.g. Call before delivery / leave at security"
+                      value={orderNotes}
+                      onChange={(e) => setOrderNotes(e.target.value)}
                       className="w-full px-4 py-2 rounded-xl bg-forest-ink border border-gold-antique/25 focus:border-gold-antique text-cream-warm focus:outline-none font-sans text-xs"
                     />
                   </div>
-
                 </div>
               </div>
 

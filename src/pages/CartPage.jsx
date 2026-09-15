@@ -24,11 +24,7 @@ export const CartPage = () => {
   const { isAuthenticated } = useAuth();
 
   const handleCheckoutClick = () => {
-    if (!isAuthenticated) {
-      navigate('/login?redirect=/checkout');
-    } else {
-      navigate('/checkout');
-    }
+    navigate('/checkout');
   };
 
   const freeShippingThreshold = 3000;

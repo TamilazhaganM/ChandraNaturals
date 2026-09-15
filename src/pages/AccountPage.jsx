@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { siteConfig } from '../config/siteConfig';
 import { orderAPI, addressAPI } from '../services/api';
+import { addressService } from '../services/addressService';
 import {
   User, Package, MapPin, Lock, LogOut, CheckCircle2,
   Clock, AlertCircle, Eye, EyeOff, Plus, Trash2, Edit3,
@@ -218,9 +218,9 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
   const fetchAddresses = async () => {
     setAddressesLoading(true);
     try {
-      const res = await addressAPI.getAddresses();
-      if (res.data?.addresses) {
-        setAddresses(res.data.addresses);
+      const userAddrs = await addressService.getUserAddresses(user);
+      if (userAddrs) {
+        setAddresses(userAddrs);
       }
     } catch (err) {
       console.warn('Could not fetch addresses:', err.message);
@@ -233,7 +233,7 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
     if (isAuthenticated) {
       fetchAddresses();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const openAddAddressModal = () => {
     setEditingAddressId(null);
@@ -301,10 +301,10 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
       };
 
       if (editingAddressId) {
-        await addressAPI.updateAddress(editingAddressId, payload);
+        await addressService.saveAddress(user, payload, editingAddressId);
         showFeedback('success', 'Address updated successfully!');
       } else {
-        await addressAPI.createAddress(payload);
+        await addressService.saveAddress(user, payload);
         showFeedback('success', 'New address added to your address book!');
       }
 
@@ -320,7 +320,7 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
   const handleDeleteAddress = async (id) => {
     if (!window.confirm('Are you sure you want to remove this delivery address?')) return;
     try {
-      await addressAPI.deleteAddress(id);
+      await addressService.deleteAddress(user, id);
       showFeedback('success', 'Address removed successfully.');
       fetchAddresses();
     } catch (err) {
@@ -330,7 +330,7 @@ export const AccountPage = ({ defaultTab = 'orders' }) => {
 
   const handleSetDefaultAddress = async (id) => {
     try {
-      await addressAPI.setDefault(id);
+      await addressService.setDefaultAddress(user, id);
       showFeedback('success', 'Default address updated.');
       fetchAddresses();
     } catch (err) {

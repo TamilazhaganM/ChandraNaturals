@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import confetti from 'canvas-confetti';
 import {
@@ -22,6 +23,7 @@ const loadRazorpayScript = () =>
   });
 
 export const RazorpayCheckoutModal = () => {
+  const navigate = useNavigate();
   const {
     isCustomerFormOpen,
     setIsCustomerFormOpen,
@@ -30,6 +32,14 @@ export const RazorpayCheckoutModal = () => {
     subtotal,
     clearCart
   } = useCart();
+
+  // Forward immediately to full checkout page with saved addresses
+  useEffect(() => {
+    if (isCustomerFormOpen) {
+      setIsCustomerFormOpen(false);
+      navigate('/checkout');
+    }
+  }, [isCustomerFormOpen, navigate, setIsCustomerFormOpen]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -101,7 +111,7 @@ export const RazorpayCheckoutModal = () => {
       currency: 'INR',
       name: 'Chandra Naturals',
       description: `Order: ${itemsList.substring(0, 200)}`,
-      image: '/favicon.svg',
+      image: '/logo.png',
       prefill: {
         name: formData.name,
         email: formData.email || undefined,

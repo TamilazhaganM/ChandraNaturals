@@ -3,7 +3,7 @@
  * Connects directly to backend API configured via VITE_API_URL
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://chandra-naturals-backend.onrender.com/api';
+const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || 'https://chandra-naturals-backend.onrender.com/api';
 
 class ApiClient {
   constructor() {
