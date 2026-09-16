@@ -19,7 +19,8 @@ import {
   ExternalLink,
   Filter,
   ChevronDown,
-  ArrowUpDown
+  ArrowUpDown,
+  Trash2
 } from 'lucide-react';
 
 // Seed demo orders for fallback if database is fresh
@@ -241,6 +242,7 @@ export const AdminOrdersPage = () => {
   // Modals state
   const [selectedOrderForStatus, setSelectedOrderForStatus] = useState(null);
   const [selectedOrderForSlip, setSelectedOrderForSlip] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   // Load orders from server or fallback
   const fetchOrders = async () => {
@@ -272,6 +274,24 @@ export const AdminOrdersPage = () => {
     );
   };
 
+  // Delete order with confirmation (for cancelled, test, or unpaid orders)
+  const handleDeleteOrder = async (order) => {
+    const isConfirmed = window.confirm(
+      `Are you sure you want to permanently delete Order #${order.orderNumber}?\n\nCustomer: ${order.shippingAddress?.fullName || 'N/A'}\nTotal: ₹${order.total}\nStatus: ${order.orderStatus.toUpperCase()}\n\nThis will remove the record from your admin panel.`
+    );
+    if (!isConfirmed) return;
+
+    setDeletingId(order._id);
+    try {
+      await adminAPI.deleteOrder(order._id);
+    } catch (err) {
+      console.warn('Backend deleteOrder failed or server offline, removing from local view:', err.message);
+    } finally {
+      setOrders(prev => prev.filter(o => o._id !== order._id));
+      setDeletingId(null);
+    }
+  };
+
   // Status counts for operational KPIs
   const counts = useMemo(() => {
     return {
@@ -280,7 +300,8 @@ export const AdminOrdersPage = () => {
       confirmed: orders.filter(o => o.orderStatus === 'confirmed').length,
       processing: orders.filter(o => o.orderStatus === 'processing').length,
       shipped: orders.filter(o => o.orderStatus === 'shipped').length,
-      delivered: orders.filter(o => o.orderStatus === 'delivered').length
+      delivered: orders.filter(o => o.orderStatus === 'delivered').length,
+      cancelled: orders.filter(o => o.orderStatus === 'cancelled').length
     };
   }, [orders]);
 
@@ -410,14 +431,15 @@ export const AdminOrdersPage = () => {
       {/* ───────────────────────────────────────────────────────────────────────────── */}
       {/* KPI Counters Grid                                                             */}
       {/* ───────────────────────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         {[
           { id: 'all', label: 'All Orders', count: counts.all, color: 'text-cream-warm' },
           { id: 'pending', label: '1. Placed', count: counts.pending, color: 'text-amber-400' },
           { id: 'confirmed', label: '2. Confirmed', count: counts.confirmed, color: 'text-blue-400' },
           { id: 'processing', label: '3. Handcrafting', count: counts.processing, color: 'text-purple-400' },
           { id: 'shipped', label: '4. Dispatched', count: counts.shipped, color: 'text-cyan-400' },
-          { id: 'delivered', label: '5. Delivered', count: counts.delivered, color: 'text-emerald-400' }
+          { id: 'delivered', label: '5. Delivered', count: counts.delivered, color: 'text-emerald-400' },
+          { id: 'cancelled', label: '6. Cancelled', count: counts.cancelled, color: 'text-rose-400' }
         ].map(item => (
           <button
             key={item.id}
@@ -562,6 +584,16 @@ export const AdminOrdersPage = () => {
                       className="px-4 py-1.5 rounded-xl bg-gold-antique hover:bg-gold-champagne text-[#0F1D12] text-xs font-bold font-sans transition-all shadow-sm active:scale-95 flex items-center gap-1.5 cursor-pointer"
                     >
                       <span>Update Stage</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteOrder(order)}
+                      disabled={deletingId === order._id}
+                      className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-300 hover:text-red-100 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      title="Delete this order"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                      <span className="hidden sm:inline">{deletingId === order._id ? 'Deleting...' : 'Delete'}</span>
                     </button>
                   </div>
                 </div>

@@ -371,15 +371,33 @@ export const CheckoutPage = () => {
           modal: {
             ondismiss: () => {
               setIsProcessing(false);
+              setAddressToast({
+                type: 'error',
+                msg: 'Razorpay payment was cancelled. Your items remain saved in your cart — you can retry online payment or choose Cash on Delivery.'
+              });
+              if (serverOrder?._id) {
+                orderAPI.cancelOrder(serverOrder._id, 'Payment cancelled by customer during Razorpay gateway popup').catch(() => {});
+              }
             }
           }
         };
 
         try {
           const rzp = new window.Razorpay(options);
-          rzp.on('payment.failed', (response) => {
+          rzp.on('payment.failed', async (response) => {
             setIsProcessing(false);
-            alert(`Payment failed: ${response.error?.description || 'Declined'}`);
+            const failReason = response.error?.description || response.error?.reason || 'Transaction declined';
+            setAddressToast({
+              type: 'error',
+              msg: `Payment failed: ${response.error?.description || 'Transaction declined'}. Your items remain in your cart.`
+            });
+            try {
+              if (serverOrder?._id) {
+                await orderAPI.cancelOrder(serverOrder._id, response.error?.description || 'Razorpay transaction failed');
+              }
+            } catch (e) {
+              // Ignore backend cancellation error
+            }
           });
           rzp.open();
         } catch (err) {
@@ -397,8 +415,8 @@ export const CheckoutPage = () => {
         window.open(waUrl, '_blank', 'noopener,noreferrer');
         finishOrderSuccess({
           orderId: serverOrder.orderNumber,
-          paymentId: 'WhatsApp-Confirmation',
-          paymentMethod: 'WhatsApp Kitchen Order',
+          paymentId: 'WhatsApp-Confirmation (Pending Verification)',
+          paymentMethod: 'WhatsApp Direct (Pending)',
           items: serverOrder.items,
           customer: customerSummary,
           total: serverOrder.total
@@ -454,13 +472,15 @@ export const CheckoutPage = () => {
                 <CheckCircle2 className="w-9 h-9" />
               </div>
               <span className="font-caveat text-2xl text-gold-antique font-semibold block">
-                Thank you for choosing tradition!
+                {orderCompleteData.isWhatsApp ? 'WhatsApp Inquiry Forwarded!' : 'Thank you for choosing tradition!'}
               </span>
               <h1 className="font-fraunces text-3xl sm:text-4xl font-bold">
-                Your Order Has Been Placed!
+                {orderCompleteData.isWhatsApp ? 'Order Inquiry Sent via WhatsApp' : 'Your Order Has Been Placed!'}
               </h1>
               <p className="text-xs sm:text-sm text-cream-warm/75 font-sans max-w-md mx-auto">
-                We have received your request. Our kitchen will hand-pack your small-batch delicacies with pure care and despatch them promptly.
+                {orderCompleteData.isWhatsApp
+                  ? 'We have redirected you to WhatsApp with your item summary. Our kitchen team will confirm fresh batch availability and finalize payment/dispatch with you.'
+                  : 'We have received your request. Our kitchen will hand-pack your small-batch delicacies with pure care and despatch them promptly.'}
               </p>
             </div>
 
@@ -477,7 +497,7 @@ export const CheckoutPage = () => {
 
               <div className="space-y-0.5 text-center sm:text-left">
                 <span className="text-cream-warm/60 uppercase tracking-widest text-[10px] block">
-                  Payment Method
+                  {orderCompleteData.isWhatsApp ? 'Order Channel' : 'Payment Method'}
                 </span>
                 <span className="font-semibold text-cream-warm">
                   {orderCompleteData.paymentMethod}
@@ -486,7 +506,7 @@ export const CheckoutPage = () => {
 
               <div className="space-y-0.5 text-center sm:text-right">
                 <span className="text-cream-warm/60 uppercase tracking-widest text-[10px] block">
-                  Total Amount Paid
+                  {orderCompleteData.isWhatsApp ? 'Total (Pay on Confirmation)' : 'Total Amount Paid'}
                 </span>
                 <span className="font-fraunces text-lg font-bold text-gold-antique">
                   ₹{orderCompleteData.total}
@@ -640,16 +660,6 @@ export const CheckoutPage = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleFetchDefaultAddress}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gold-antique/15 hover:bg-gold-antique text-gold-antique hover:text-forest-ink border border-gold-antique/35 font-bold font-sans text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
-                      title="Fetch and apply your default saved address"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Fetch Saved Address (Default)</span>
-                    </button>
-
                     {user ? (
                       <span className="text-[11px] text-emerald-400 font-medium font-sans flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />
@@ -661,53 +671,6 @@ export const CheckoutPage = () => {
                       </Link>
                     )}
                   </div>
-                </div>
-
-                {/* View Mode Switcher Tabs */}
-                <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 rounded-xl bg-forest-ink/60 border border-gold-antique/20 font-sans text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (addresses.length > 0) {
-                          setIsAddingAddress(false);
-                          setEditingAddressId(null);
-                        } else {
-                          handleFetchDefaultAddress();
-                        }
-                      }}
-                      className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                        !isAddingAddress && addresses.length > 0
-                          ? 'bg-gold-antique text-forest-ink shadow-sm'
-                          : 'text-cream-warm/75 hover:text-gold-antique'
-                      }`}
-                    >
-                      <Home className="w-3.5 h-3.5" />
-                      <span>Saved Addresses ({addresses.length})</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={openAddNewAddress}
-                      className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                        isAddingAddress && !editingAddressId
-                          ? 'bg-gold-antique text-forest-ink shadow-sm'
-                          : 'text-cream-warm/75 hover:text-gold-antique'
-                      }`}
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>+ Add New Address</span>
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleFetchDefaultAddress}
-                    className="text-gold-antique hover:underline text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    <span>Fetch / Auto-select Default</span>
-                  </button>
                 </div>
 
                 {/* Toast alert banner if active */}
@@ -747,28 +710,18 @@ export const CheckoutPage = () => {
                 ) : !isAddingAddress && addresses.length > 0 ? (
                   /* SAVED ADDRESSES SELECTOR */
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between pb-1 border-b border-gold-antique/15">
                       <span className="text-xs font-semibold text-cream-warm/80 font-sans">
                         Select delivery address ({addresses.length} saved):
                       </span>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={handleFetchDefaultAddress}
-                          className="text-[11px] text-gold-antique hover:underline font-medium font-sans flex items-center gap-1 cursor-pointer"
-                        >
-                          <Sparkles className="w-3 h-3" />
-                          <span>Fetch Default</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={openAddNewAddress}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold-antique text-forest-ink font-bold font-sans text-xs hover:bg-gold-champagne transition-all shadow-md active:scale-95 cursor-pointer"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Add New Address</span>
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={openAddNewAddress}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gold-antique text-forest-ink font-bold font-sans text-xs hover:bg-gold-champagne transition-all shadow-md active:scale-95 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ Add New Address</span>
+                      </button>
                     </div>
 
                     {/* Grid of Saved Addresses */}
@@ -1155,14 +1108,6 @@ export const CheckoutPage = () => {
                           </p>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={openAddNewAddress}
-                        className="text-[11px] text-gold-antique hover:underline whitespace-nowrap cursor-pointer flex items-center gap-1 font-semibold self-end sm:self-auto"
-                      >
-                        <Plus className="w-3 h-3" />
-                        <span>Add / Switch Address</span>
-                      </button>
                     </div>
                   );
                 })()}

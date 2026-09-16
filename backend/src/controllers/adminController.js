@@ -274,3 +274,37 @@ export const updateOrderStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Admin: Delete order
+ * Allows admin to delete test, cancelled, or abandoned orders
+ */
+export const deleteOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return errorResponse(res, {
+        statusCode: 404,
+        message: 'Order not found',
+        errorCode: ERROR_CODES.NOT_FOUND
+      });
+    }
+
+    // If order was not cancelled, restore reserved stock before deleting so stock count stays accurate
+    if (order.orderStatus !== ORDER_STATUS.CANCELLED && order.orderStatus !== ORDER_STATUS.DELIVERED) {
+      await orderService.restoreStock(order.items);
+    }
+
+    await Order.findByIdAndDelete(id);
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: `Order #${order.orderNumber} deleted successfully`,
+      data: { orderId: id }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

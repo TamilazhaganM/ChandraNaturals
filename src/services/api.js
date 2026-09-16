@@ -206,6 +206,7 @@ export const adminAPI = {
   getOrders: (params = '') => api.get(`/admin/orders${params ? `?${params}` : ''}`),
   getOrderById: (id) => api.get(`/admin/orders/${id}`),
   updateOrderStatus: (id, payload) => api.put(`/admin/orders/${id}/status`, payload),
+  deleteOrder: (id) => api.delete(`/admin/orders/${id}`),
   updateStock: (id, payload) => api.patch(`/admin/products/${id}/stock`, payload),
   updateProduct: (id, payload) => api.put(`/admin/products/${id}`, payload),
   createProduct: (payload) => api.post('/admin/products', payload),

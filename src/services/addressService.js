@@ -2,233 +2,138 @@ import { addressAPI } from './api.js';
 
 /**
  * Address Service
- * Manages saved delivery addresses for each individual user.
- * Provides resilient multi-key localStorage caching per user with automatic backend synchronization.
+ * Manages delivery addresses with strict per-user isolation.
+ * Every registered user has their own separate address book.
  */
 
-// Helper to extract candidate storage keys for a user session
-const getCandidateStorageKeys = (user) => {
-  const keys = [];
-  if (user) {
-    if (user._id) keys.push(`chandra_addresses_${user._id}`);
-    if (user.id && user.id !== user._id) keys.push(`chandra_addresses_${user.id}`);
-    if (user.email) keys.push(`chandra_addresses_${user.email.toLowerCase().trim()}`);
-    if (user.phone) keys.push(`chandra_addresses_${String(user.phone).replace(/\D/g, '')}`);
-  }
-  // Shared / fallback storage keys
-  keys.push('chandra_saved_addresses');
-  keys.push('chandra_addresses_default');
-  keys.push('chandra_addresses_guest');
-  return [...new Set(keys)];
-};
-
-const getPrimaryStorageKey = (user) => {
-  if (!user) return 'chandra_addresses_guest';
-  const id = user._id || user.id || (user.email ? user.email.toLowerCase().trim() : '') || user.phone || 'guest';
-  return `chandra_addresses_${id}`;
+// Generate a strictly scoped storage key per user
+export const getUserAddressKey = (user) => {
+  if (!user) return 'chandra_addr_guest';
+  const id = user._id || user.id || (user.email ? user.email.toLowerCase().trim() : user.phone || 'guest');
+  return `chandra_addr_${id}`;
 };
 
 export const addressService = {
   /**
-   * Get cached addresses from localStorage for a specific user,
-   * searching across primary and secondary candidate keys and embedded user profile.
+   * Get cached addresses strictly for the active user
    */
   getCachedAddresses(user) {
     try {
-      const candidateKeys = getCandidateStorageKeys(user);
-      const allFound = [];
+      const key = getUserAddressKey(user);
+      const raw = localStorage.getItem(key);
+      let list = [];
 
-      for (const key of candidateKeys) {
+      if (raw) {
         try {
-          const raw = localStorage.getItem(key);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              allFound.push(...parsed);
-            } else if (parsed && typeof parsed === 'object' && parsed.addressLine) {
-              allFound.push(parsed);
-            }
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            list = parsed;
           }
         } catch {
-          // ignore parsing error for this key
+          list = [];
         }
       }
 
-      // Also check if user object has embedded addresses from database
+      // Also merge any backend-synced addresses on user object
       if (user && Array.isArray(user.addresses) && user.addresses.length > 0) {
-        allFound.push(...user.addresses);
-      }
-
-      // Check if user object has a single legacy address field
-      if (user && user.address && typeof user.address === 'string' && user.address.trim().length > 5) {
-        allFound.push({
-          _id: `profile_addr_${user._id || 'default'}`,
-          fullName: user.name || user.fullName || 'Valued Customer',
-          phone: user.phone || '',
-          addressLine: user.address,
-          landmark: '',
-          city: user.city || 'Chennai',
-          state: user.state || 'Tamil Nadu',
-          pincode: user.pincode || '',
-          addressType: 'home',
-          isDefault: true
-        });
-      }
-
-      if (allFound.length === 0) {
-        return [];
-      }
-
-      // Deduplicate addresses by _id or by normalized (addressLine + pincode)
-      const seen = new Set();
-      const deduplicated = [];
-
-      for (const addr of allFound) {
-        if (!addr || !addr.addressLine) continue;
-        const dedupeKey = addr._id || `${addr.addressLine.toLowerCase().trim()}_${addr.pincode}`;
-        if (!seen.has(dedupeKey)) {
-          seen.add(dedupeKey);
-          deduplicated.push({
-            _id: addr._id || `addr_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-            fullName: addr.fullName || user?.name || '',
-            phone: addr.phone || user?.phone || '',
-            addressLine: addr.addressLine || '',
-            landmark: addr.landmark || '',
-            city: addr.city || 'Chennai',
-            state: addr.state || 'Tamil Nadu',
-            pincode: addr.pincode || '',
-            addressType: addr.addressType || 'home',
-            isDefault: Boolean(addr.isDefault)
-          });
+        for (const uAddr of user.addresses) {
+          if (uAddr && uAddr.addressLine && !list.some(a => a._id === uAddr._id)) {
+            list.push(uAddr);
+          }
         }
       }
 
-      // Ensure at least one address is marked default if list is not empty
-      if (deduplicated.length > 0 && !deduplicated.some(a => a.isDefault)) {
-        deduplicated[0].isDefault = true;
+      // Filter out any corrupt or empty entries
+      const validAddresses = list.filter(
+        a => a && typeof a === 'object' && a.addressLine && a.addressLine.trim().length > 0
+      );
+
+      // Ensure at least one is default if list is not empty
+      if (validAddresses.length > 0 && !validAddresses.some(a => a.isDefault)) {
+        validAddresses[0].isDefault = true;
       }
 
-      return deduplicated;
+      return validAddresses;
     } catch (e) {
-      console.warn('Could not read cached addresses:', e);
+      console.warn('Could not read cached user addresses:', e);
       return [];
     }
   },
 
   /**
-   * Set cached addresses in localStorage across candidate keys so it's always found
+   * Set cached addresses strictly for the active user
    */
   setCachedAddresses(user, addresses) {
     try {
-      const primaryKey = getPrimaryStorageKey(user);
-      const json = JSON.stringify(addresses);
+      const key = getUserAddressKey(user);
+      localStorage.setItem(key, JSON.stringify(addresses));
 
-      localStorage.setItem(primaryKey, json);
-      // Also update shared / fallback keys so checkout always retrieves them
-      localStorage.setItem('chandra_saved_addresses', json);
-      if (user?.email) {
-        localStorage.setItem(`chandra_addresses_${user.email.toLowerCase().trim()}`, json);
-      }
-      if (addresses.length > 0) {
-        const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
-        localStorage.setItem('chandra_addresses_default', JSON.stringify(defaultAddr));
-      }
-
-      // Notify other components/listeners on the same page
-      window.dispatchEvent(new CustomEvent('chandra_address_updated', { detail: { addresses } }));
+      // Notify components for this user session
+      window.dispatchEvent(
+        new CustomEvent('chandra_address_updated', {
+          detail: { userId: user?._id || user?.email || 'guest', addresses }
+        })
+      );
     } catch (e) {
-      console.warn('Could not write cached addresses:', e);
+      console.warn('Could not write cached user addresses:', e);
     }
   },
 
   /**
-   * Helper to construct a reliable default delivery address for a user or demo session
-   */
-  createDefaultAddress(user) {
-    const fullName = user?.name || user?.fullName || 'Tamil Azhagan';
-    const rawPhone = user?.phone || '9840123456';
-    const phone = String(rawPhone).replace(/\D/g, '').slice(-10) || '9840123456';
-    const addressLine = (user?.address && typeof user.address === 'string' && user.address.length > 5)
-      ? user.address
-      : 'No. 12, Chandra Heritage, TTK Road, Alwarpet';
-    const landmark = 'Near Music Academy';
-    const city = user?.city || 'Chennai';
-    const state = user?.state || 'Tamil Nadu';
-    const pincode = user?.pincode || '600018';
-
-    return {
-      _id: `addr_default_${user?._id || user?.id || (user?.email ? user.email.replace(/\W/g, '_') : 'demo')}`,
-      fullName,
-      phone,
-      addressLine,
-      landmark,
-      city,
-      state,
-      pincode,
-      addressType: 'home',
-      isDefault: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-  },
-
-  /**
-   * Fetch addresses for a user from API with comprehensive local cache fallback.
-   * Guarantees at least one default delivery address is returned and cached.
+   * Fetch addresses for a user from API with local cache fallback
    */
   async getUserAddresses(user) {
-    let cached = this.getCachedAddresses(user);
+    const cached = this.getCachedAddresses(user);
 
-    if (user) {
-      try {
-        const res = await addressAPI.getAddresses();
-        if (res?.data?.addresses && res.data.addresses.length > 0) {
-          const apiAddresses = res.data.addresses;
-          this.setCachedAddresses(user, apiAddresses);
-          return apiAddresses;
-        }
-      } catch (err) {
-        // Backend offline or failed - fallback to local cache
+    if (!user) {
+      return cached;
+    }
+
+    try {
+      const res = await addressAPI.getAddresses();
+      if (res?.data?.addresses && res.data.addresses.length > 0) {
+        const apiAddresses = res.data.addresses;
+        this.setCachedAddresses(user, apiAddresses);
+        return apiAddresses;
       }
+      return cached;
+    } catch (err) {
+      // Backend offline or unreachable — cleanly use local user cache
+      return cached;
     }
-
-    // If no addresses found, automatically initialize and persist the default address!
-    if (!cached || cached.length === 0) {
-      const defaultAddr = this.createDefaultAddress(user);
-      cached = [defaultAddr];
-      this.setCachedAddresses(user, cached);
-    }
-
-    return cached;
   },
 
   /**
-   * Returns default address or creates one if none exists
+   * Get default address for active user, if one exists
    */
   getDefaultAddress(user) {
     const addresses = this.getCachedAddresses(user);
     if (addresses.length > 0) {
       return addresses.find(a => a.isDefault) || addresses[0];
     }
-
-    // Try reading last saved default address directly
-    try {
-      const savedDefault = localStorage.getItem('chandra_addresses_default');
-      if (savedDefault) {
-        const parsed = JSON.parse(savedDefault);
-        if (parsed && parsed.addressLine) {
-          return parsed;
-        }
-      }
-    } catch {}
-
-    const defaultAddr = this.createDefaultAddress(user);
-    this.setCachedAddresses(user, [defaultAddr]);
-    return defaultAddr;
+    return null;
   },
 
   /**
-   * Save (create or update) an address for a user
+   * Generate clean initial form data pre-filled ONLY with active user's own profile info
+   */
+  getInitialAddressForm(user) {
+    return {
+      fullName: user?.name || user?.fullName || '',
+      phone: user?.phone ? String(user.phone).replace(/\D/g, '').slice(-10) : '',
+      addressLine: '',
+      landmark: '',
+      city: user?.city || 'Chennai',
+      state: user?.state || 'Tamil Nadu',
+      pincode: user?.pincode || '',
+      addressType: 'home',
+      isDefault: true,
+      saveForFuture: true
+    };
+  },
+
+  /**
+   * Save (create or update) an address strictly for this user
    */
   async saveAddress(user, addressData, editingId = null) {
     const cached = this.getCachedAddresses(user);
@@ -246,7 +151,7 @@ export const addressService = {
 
     let savedItem = null;
 
-    // Try backend API first
+    // Try backend API first if online
     try {
       if (editingId) {
         const res = await addressAPI.updateAddress(editingId, cleanPayload);
@@ -256,10 +161,9 @@ export const addressService = {
         savedItem = res?.data?.address;
       }
     } catch (err) {
-      console.warn('API save address failed, updating local user cache:', err.message);
+      // Backend offline — will persist in local user storage
     }
 
-    // If backend couldn't return or was offline, construct record locally
     if (!savedItem) {
       savedItem = {
         _id: editingId || `addr_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
@@ -269,7 +173,6 @@ export const addressService = {
       };
     }
 
-    // Update local cache
     let updatedAddresses = [];
     if (editingId) {
       updatedAddresses = cached.map(addr =>
@@ -279,16 +182,13 @@ export const addressService = {
       updatedAddresses = [savedItem, ...cached];
     }
 
-    // If marked default, reset other addresses
-    if (savedItem.isDefault) {
+    // Default address logic: if marked default or first address, update flags
+    if (savedItem.isDefault || updatedAddresses.length === 1) {
+      savedItem.isDefault = true;
       updatedAddresses = updatedAddresses.map(addr => ({
         ...addr,
         isDefault: addr._id === savedItem._id
       }));
-    } else if (updatedAddresses.length === 1) {
-      // First address is always default
-      updatedAddresses[0].isDefault = true;
-      savedItem.isDefault = true;
     }
 
     this.setCachedAddresses(user, updatedAddresses);
@@ -296,27 +196,24 @@ export const addressService = {
   },
 
   /**
-   * Delete an address
+   * Delete an address for active user
    */
   async deleteAddress(user, addressId) {
     try {
       await addressAPI.deleteAddress(addressId);
     } catch (err) {
-      console.warn('API delete address failed, removing from local user cache:', err.message);
+      // Backend offline
     }
 
     const cached = this.getCachedAddresses(user);
     const updated = cached.filter(addr => addr._id !== addressId);
 
-    // If the deleted address was default and addresses remain, make the first one default
     const wasDefault = cached.find(a => a._id === addressId)?.isDefault;
     if (wasDefault && updated.length > 0) {
       updated[0].isDefault = true;
       try {
         await addressAPI.setDefault(updated[0]._id);
-      } catch {
-        // ignore
-      }
+      } catch {}
     }
 
     this.setCachedAddresses(user, updated);
@@ -324,13 +221,13 @@ export const addressService = {
   },
 
   /**
-   * Set an address as default
+   * Set an address as default for active user
    */
   async setDefaultAddress(user, addressId) {
     try {
       await addressAPI.setDefault(addressId);
     } catch (err) {
-      console.warn('API setDefault address failed, updating local user cache:', err.message);
+      // Backend offline
     }
 
     const cached = this.getCachedAddresses(user);

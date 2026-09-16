@@ -3,7 +3,8 @@ import {
   getDashboardStats,
   getAdminOrders,
   getAdminOrderById,
-  updateOrderStatus
+  updateOrderStatus,
+  deleteOrder
 } from '../controllers/adminController.js';
 import {
   createProduct,
@@ -25,6 +26,7 @@ router.get('/dashboard', getDashboardStats);
 router.get('/orders', getAdminOrders);
 router.get('/orders/:id', getAdminOrderById);
 router.put('/orders/:id/status', updateOrderStatus);
+router.delete('/orders/:id', deleteOrder);
 
 // Product management
 router.post('/products', createProduct);
