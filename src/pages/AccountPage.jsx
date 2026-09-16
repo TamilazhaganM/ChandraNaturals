@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { orderAPI, addressAPI } from '../services/api';
 import { addressService } from '../services/addressService';
+import { siteConfig } from '../config/siteConfig';
 import {
   User, Package, MapPin, Lock, LogOut, CheckCircle2,
   Clock, AlertCircle, Eye, EyeOff, Plus, Trash2, Edit3,
