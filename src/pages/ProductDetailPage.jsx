@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { products, productCategories } from '../data/products';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
 import { ProductReviews } from '../components/reviews/ProductReviews';
 import { VegMark } from '../components/common/VegMark';
 import {
@@ -17,6 +18,7 @@ export const ProductDetailPage = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { toggleWishlist, isWishlisted } = useWishlist();
+  const { isAuthenticated } = useAuth();
 
   // Locate product by slug or id
   const product = useMemo(() => {
@@ -115,7 +117,11 @@ export const ProductDetailPage = () => {
       price: calculatedPrice
     };
     addToCart(customizedProduct, quantity);
-    navigate('/checkout');
+    if (!isAuthenticated) {
+      navigate('/auth?redirect=/checkout');
+    } else {
+      navigate('/checkout');
+    }
   };
 
   const generateWhatsAppUrl = () => {

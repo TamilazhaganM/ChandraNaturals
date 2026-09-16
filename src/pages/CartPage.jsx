@@ -24,7 +24,11 @@ export const CartPage = () => {
   const { isAuthenticated } = useAuth();
 
   const handleCheckoutClick = () => {
-    navigate('/checkout');
+    if (!isAuthenticated) {
+      navigate('/auth?redirect=/checkout');
+    } else {
+      navigate('/checkout');
+    }
   };
 
   const freeShippingThreshold = 3000;
@@ -390,7 +394,7 @@ export const CartPage = () => {
                     className="w-full py-4 px-6 rounded-xl bg-gold-antique hover:bg-gold-champagne text-forest-ink font-sans font-bold text-sm uppercase tracking-wider transition-all duration-300 shadow-gold-glow flex items-center justify-center gap-2 group cursor-pointer active:scale-[0.99]"
                   >
                     <Lock className="w-4 h-4" />
-                    <span>Proceed to Full Checkout</span>
+                    <span>{isAuthenticated ? 'Proceed to Full Checkout' : 'Sign In to Checkout'}</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
 

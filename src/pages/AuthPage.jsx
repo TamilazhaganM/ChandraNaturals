@@ -17,6 +17,13 @@ export const AuthPage = () => {
   const searchParams = new URLSearchParams(location.search);
   const redirectUrl = searchParams.get('redirect') || '/shop';
 
+  // If already authenticated and there's a specific redirect target (like /checkout), navigate directly
+  useEffect(() => {
+    if (isAuthenticated && user && redirectUrl && redirectUrl !== '/shop') {
+      navigate(redirectUrl, { replace: true });
+    }
+  }, [isAuthenticated, user, redirectUrl, navigate]);
+
   // Active view: 'login' | 'register'
   const [activeTab, setActiveTab] = useState(
     location.pathname === '/register' ? 'register' : 'login'
@@ -566,6 +573,18 @@ export const AuthPage = () => {
         {/* Main Card */}
         <div className="rounded-3xl bg-forest-deep border-2 border-gold-antique/40 p-6 sm:p-8 shadow-2xl space-y-6">
           
+          {redirectUrl === '/checkout' && (
+            <div className="p-4 rounded-2xl bg-gold-antique/15 border border-gold-antique/40 flex items-start sm:items-center gap-3 text-xs font-sans text-cream-warm animate-fadeIn">
+              <Lock className="w-5 h-5 text-gold-antique shrink-0 mt-0.5 sm:mt-0" />
+              <div>
+                <p className="font-bold text-gold-antique text-sm">Customer Sign In Required</p>
+                <p className="text-cream-warm/80 text-xs">
+                  Please sign in or register below to access your saved delivery addresses and complete your order.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Tab Switcher */}
           <div className="grid grid-cols-2 p-1.5 rounded-2xl bg-forest-ink border border-gold-antique/30 font-sans text-xs font-bold uppercase tracking-wider">
             <button

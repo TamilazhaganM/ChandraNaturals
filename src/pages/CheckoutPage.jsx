@@ -39,7 +39,13 @@ export const CheckoutPage = () => {
   const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Guest or authenticated checkout: both are supported smoothly
+  // Enforce customer login: guests must log in before accessing checkout and address management
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate('/auth?redirect=/checkout', { replace: true });
+    }
+  }, [loading, isAuthenticated, navigate]);
+
   useEffect(() => {
     // Sync invoice email with user if logged in
     if (user?.email) {
@@ -574,6 +580,57 @@ export const CheckoutPage = () => {
               </Link>
             </div>
 
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 1. If auth is still resolving, show clean loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-32 pb-24 bg-botanical-mesh flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-gold-antique">
+          <div className="w-8 h-8 border-2 border-gold-antique border-t-transparent rounded-full animate-spin" />
+          <span className="font-sans text-xs tracking-wider uppercase text-cream-warm/75">
+            Verifying your account...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. If user is guest / not authenticated, require login before proceeding to address & checkout
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen pt-32 pb-24 bg-botanical-mesh flex items-center justify-center px-4">
+        <div className="max-w-md w-full p-8 rounded-3xl bg-forest-deep border-2 border-gold-antique/40 shadow-2xl text-center space-y-6">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-gold-antique/15 border border-gold-antique/30 flex items-center justify-center text-gold-antique shadow-gold-glow">
+            <Lock className="w-8 h-8" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="font-fraunces text-2xl sm:text-3xl font-bold text-cream-warm">
+              Sign In to Checkout
+            </h2>
+            <p className="text-xs sm:text-sm text-cream-warm/75 font-sans leading-relaxed">
+              To deliver your artisanal small-batch order safely and access your saved delivery addresses, please sign in or create an account.
+            </p>
+          </div>
+          <div className="space-y-3 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate('/auth?redirect=/checkout')}
+              className="w-full py-3.5 px-6 rounded-xl bg-gold-antique hover:bg-gold-champagne text-forest-ink font-bold font-sans text-xs uppercase tracking-wider transition-all shadow-gold-glow active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>Sign In / Register</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <Link
+              to="/cart"
+              className="inline-block text-xs text-cream-warm/60 hover:text-gold-antique font-sans underline"
+            >
+              ← Return to Cart
+            </Link>
           </div>
         </div>
       </div>

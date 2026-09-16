@@ -46,7 +46,11 @@ export const OrderSummaryDrawer = () => {
 
   const handleProceedToDetails = () => {
     setIsCartOpen(false);
-    navigate('/checkout');
+    if (!isAuthenticated) {
+      navigate('/auth?redirect=/checkout');
+    } else {
+      navigate('/checkout');
+    }
   };
 
   return (
@@ -246,7 +250,7 @@ export const OrderSummaryDrawer = () => {
               className="w-full py-3.5 px-6 rounded-xl bg-gold-antique hover:bg-gold-champagne text-forest-ink font-sans font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 shadow-gold-glow flex items-center justify-center gap-2 group cursor-pointer"
             >
               <CreditCard className="w-4 h-4" />
-              <span>Proceed to Checkout</span>
+              <span>{isAuthenticated ? 'Proceed to Checkout' : 'Sign In to Checkout'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
 
