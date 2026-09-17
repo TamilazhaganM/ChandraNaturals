@@ -84,8 +84,9 @@ export const CheckoutPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderCompleteData, setOrderCompleteData] = useState(null);
 
-  // Delivery charge calculation
-  const isFreeShipping = subtotal >= 3000;
+  // Delivery charge calculation: free if subtotal >= 3000 or if Rs. 1 test order
+  const isTestOneRupeeOrder = cart.length > 0 && cart.every(item => item.product?.price === 1 || item.price === 1 || item.product?.id === 'tomato-thokku');
+  const isFreeShipping = subtotal >= 3000 || isTestOneRupeeOrder;
   const shippingFee = cart.length === 0 ? 0 : isFreeShipping ? 0 : 99;
   const grandTotal = subtotal + shippingFee;
 

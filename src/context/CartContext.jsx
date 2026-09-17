@@ -21,7 +21,7 @@ const normalizeProduct = (prod) => {
   const lookupKey = prod.slug || prod.id || prod._id;
   const found = products.find(p => p.id === lookupKey || p._id === lookupKey);
   if (found) {
-    return { ...found, _id: prod._id || found._id || found.id };
+    return { ...found, ...prod, _id: prod._id || found._id || found.id };
   }
   return {
     ...prod,

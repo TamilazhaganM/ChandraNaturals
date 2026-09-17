@@ -32,9 +32,10 @@ export const CartPage = () => {
   };
 
   const freeShippingThreshold = 3000;
-  const isFreeShipping = subtotal >= freeShippingThreshold;
-  const amountNeededForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
-  const freeShippingProgress = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
+  const isTestOneRupeeOrder = cart.length > 0 && cart.every(item => item.product?.price === 1 || item.price === 1 || item.product?.id === 'tomato-thokku' || item.id === 'tomato-thokku');
+  const isFreeShipping = subtotal >= freeShippingThreshold || isTestOneRupeeOrder;
+  const amountNeededForFreeShipping = isTestOneRupeeOrder ? 0 : Math.max(0, freeShippingThreshold - subtotal);
+  const freeShippingProgress = isTestOneRupeeOrder ? 100 : Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
 
   return (
     <div className="min-h-screen pt-28 pb-24 bg-botanical-mesh">

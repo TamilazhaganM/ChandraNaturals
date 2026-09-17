@@ -87,12 +87,16 @@ export const ProductDetailPage = () => {
     );
   }
 
-  // Calculate dynamic price based on weight multiplier
-  const calculatedPrice = Math.round(product.price * (selectedWeight.multiplier || 1.0));
-  const calculatedOriginalPrice = product.originalPrice
-    ? Math.round(product.originalPrice * (selectedWeight.multiplier || 1.0))
+  // Calculate dynamic price based on weight multiplier or direct variety price
+  const calculatedPrice = selectedWeight?.price !== undefined
+    ? selectedWeight.price
+    : Math.round(product.price * (selectedWeight?.multiplier || 1.0));
+  const calculatedOriginalPrice = product.compareAtPrice || product.originalPrice
+    ? Math.round((product.compareAtPrice || product.originalPrice) * (selectedWeight?.multiplier || 1.0))
     : Math.round(calculatedPrice * 1.18);
-  const discountPercent = Math.round(((calculatedOriginalPrice - calculatedPrice) / calculatedOriginalPrice) * 100);
+  const discountPercent = calculatedOriginalPrice > calculatedPrice
+    ? Math.round(((calculatedOriginalPrice - calculatedPrice) / calculatedOriginalPrice) * 100)
+    : 0;
 
   // Category object
   const categoryInfo = productCategories.find(c => c.id === product.category);

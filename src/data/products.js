@@ -62,9 +62,14 @@ export const products = [
     id: "tomato-thokku",
     name: "Country Tomato (Nattu Thakkali) Mix",
     category: "thokku",
-    price: 240,
-    compareAtPrice: 275,
+    price: 1,
+    compareAtPrice: 240,
     weight: "250g",
+    weightOptions: [
+      { label: "250g Glass Jar", multiplier: 1.0, price: 1 },
+      { label: "500g Glass Jar", multiplier: 1.0, price: 1 },
+      { label: "1 kg Family Pack", multiplier: 1.0, price: 1 }
+    ],
     image: tomatoMixImg,
     shortDescription: "Ripe farm-fresh country tomatoes slow-reduced until thick and fragrant with aromatic curry leaves.",
     description: "Sun-ripened indigenous country tomatoes reduced to a velvety, rich consistency over a slow flame. Infused with freshly roasted aromatic spices, curry leaves, and unrefined wood-pressed oil.",
@@ -73,7 +78,7 @@ export const products = [
     storage: "Keep in a cool, dry cupboard. Keep the rim clean and use a dry wooden or steel spoon. Keep refrigerated once opened.",
     shelfLife: "6 Months from date of packing",
     isVeg: true,
-    badge: "Bestseller",
+    badge: "₹1 Live Test",
     available: true,
     rating: 4.9,
     reviewCount: 128
