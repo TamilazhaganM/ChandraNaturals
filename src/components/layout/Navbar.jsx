@@ -102,11 +102,11 @@ export const Navbar = () => {
   const subCategories = [
     { name: 'All Products', path: '/shop' },
     { name: 'Thokku Varieties', path: '/shop/thokku' },
-    { name: 'Health Mix & Grains', path: '/shop/health-mix' },
-    { name: 'Ghee', path: '/shop/ghee' },
-    { name: 'Masalas', path: '/shop/masalas' },
-    { name: 'Skin & Hair Care', path: '/shop/skin-hair' },
-    { name: 'Special Combos', path: '/shop/combos' },
+    { name: 'Health Mix & Ghee', path: '/shop/health-mix-ghee' },
+    { name: 'Dosa Batters', path: '/shop/dosa-batters' },
+    { name: 'Masalas & Spice Powders', path: '/shop/masalas-spices' },
+    { name: 'Skin and Hair Care', path: '/shop/skin-hair' },
+    { name: 'Combo Bundles', path: '/shop/combos' },
   ];
 
   const isCategoriesActive = (location.pathname === '/shop' || location.pathname.startsWith('/shop/')) && !location.pathname.includes('combo');

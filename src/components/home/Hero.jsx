@@ -16,9 +16,9 @@ export const Hero = () => {
   const bannerSlides = [
     {
       id: 1,
-      tag: "Signature Relish",
-      title: "Country Tomato (Thakkali) Thokku",
-      subtitle: "Slow-simmered in small batches with native cold-pressed gingelly oil and hand-roasted spices.",
+      tag: "Relish",
+      title: "Tomato Mix",
+      subtitle: "Slow-simmered in small batches with cold-pressed gingelly oil and roasted spices.",
       badge: "Signature Pick",
       image: bannerTomatoMix,
       link: "/shop/thokku",
@@ -26,19 +26,19 @@ export const Hero = () => {
     },
     {
       id: 2,
-      tag: "Vedic Tradition",
-      title: "Cultured A2 Bilona Ghee",
-      subtitle: "Handcrafted from grass-fed native indigenous cow curd using traditional wooden bilona churning.",
-      badge: "Pure A2 Ghee",
+      tag: "Pure Ghee",
+      title: "Pure Cow Ghee",
+      subtitle: "Prepared from cow milk using traditional wooden bilona churning.",
+      badge: "Pure Ghee",
       image: bannerGhee,
-      link: "/shop/ghee",
+      link: "/shop/health-mix-ghee",
       linkText: "Explore Collection"
     },
     {
       id: 3,
       tag: "Medicinal Greens",
       title: "Pirandai & Mudakathan Thokku",
-      subtitle: "Wild-harvested medicinal greens for natural joint comfort, digestive wellness, and bone vitality.",
+      subtitle: "Medicinal greens for natural joint comfort, digestive wellness, and vitality.",
       badge: "Joint & Gut Care",
       image: bannerPirandaiMudakathan,
       link: "/shop/thokku",
@@ -47,9 +47,9 @@ export const Hero = () => {
     {
       id: 4,
       tag: "Immunity & Flavor",
-      title: "Tomato & Poondu (Garlic) Thokku",
-      subtitle: "Slow-simmered country tomatoes with whole roasted garlic cloves and native wood-pressed gingelly oil.",
-      badge: "Bestseller Combo",
+      title: "Tomato & Poondu Thokku",
+      subtitle: "Country tomatoes with garlic and native wood-pressed gingelly oil.",
+      badge: "Bestseller Duo",
       image: bannerTomatoPoondu,
       link: "/shop/thokku",
       linkText: "Explore Collection"
@@ -74,15 +74,7 @@ export const Hero = () => {
   };
 
   // 6 balanced categories for even 3x2 on mobile, 6x1 on desktop
-  const allHeroCategories = [
-    ...productCategories,
-    {
-      id: 'combos',
-      name: 'Combo Sets',
-      subtitle: 'Value Sets',
-      image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=800&auto=format&fit=crop'
-    }
-  ];
+  const allHeroCategories = productCategories;
 
   return (
     <section id="home" className="relative pt-28 sm:pt-32 pb-12 overflow-hidden bg-botanical-mesh">

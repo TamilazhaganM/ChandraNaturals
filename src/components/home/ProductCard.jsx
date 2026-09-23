@@ -105,10 +105,6 @@ export const ProductCard = ({ product }) => {
             {product.name}
           </h3>
         </Link>
-
-        <p className="hidden sm:block font-sans text-xs text-cream-warm/75 line-clamp-2 leading-relaxed">
-          {product.shortDescription}
-        </p>
       </div>
 
       {/* Price & Action Row */}

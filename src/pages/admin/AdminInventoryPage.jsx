@@ -196,9 +196,13 @@ export const AdminInventoryPage = () => {
       // Category filter
       if (selectedCategory !== 'all') {
         const cat = (p.category || '').toLowerCase();
-        if (selectedCategory === 'combos' && !p.isCombo && !cat.includes('combo')) {
-          return false;
-        } else if (selectedCategory !== 'combos' && cat !== selectedCategory) {
+        if (selectedCategory === 'combos') {
+          if (!p.isCombo && !cat.includes('combo')) return false;
+        } else if (selectedCategory === 'health-mix-ghee') {
+          if (!['health-mix-ghee', 'health-mix', 'ghee'].includes(cat)) return false;
+        } else if (selectedCategory === 'masalas-spices') {
+          if (!['masalas-spices', 'masalas'].includes(cat)) return false;
+        } else if (cat !== selectedCategory) {
           return false;
         }
       }
@@ -335,12 +339,9 @@ export const AdminInventoryPage = () => {
             className="px-3.5 py-2.5 rounded-xl bg-forest-ink border border-gold-antique/25 text-cream-warm text-xs font-semibold font-sans focus:outline-none focus:border-gold-antique"
           >
             <option value="all">All Categories</option>
-            <option value="thokku">Thokku Varieties</option>
-            <option value="health-mix">Health Mix & Grains</option>
-            <option value="ghee">Cultured Ghee</option>
-            <option value="masalas">Heirloom Masalas</option>
-            <option value="skin-hair">Botanical Care</option>
-            <option value="combos">Special Combos</option>
+            {productCategories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
           </select>
         </div>
       </div>

@@ -21,7 +21,13 @@ export const ShopPage = () => {
   // Sync state if URL param changes
   useEffect(() => {
     if (categoryId) {
-      setSelectedCategory(categoryId);
+      if (categoryId === 'health-mix' || categoryId === 'ghee') {
+        setSelectedCategory('health-mix-ghee');
+      } else if (categoryId === 'masalas' || categoryId === 'masalas-spices') {
+        setSelectedCategory('masalas-spices');
+      } else {
+        setSelectedCategory(categoryId);
+      }
     } else if (
       location.pathname === '/combos' ||
       location.pathname === '/special-combo' ||
@@ -54,7 +60,7 @@ export const ShopPage = () => {
       return {
         name: "Complete Artisanal Pantry",
         subtitle: "Traditional & Handcrafted",
-        description: "Explore our full range of small-batch thokkus, slow-churned A2 bilona ghee, sprouted multi-millet porridge mixes, handcrafted masalas, and herbal skin & hair care."
+        description: "Explore our full range of small-batch thokkus, slow-churned Vedic A2 bilona ghee, sprouted multi-millet porridge mixes, heritage fermented dosa batters, stone-ground masalas, and botanical skin & hair care."
       };
     }
     if (selectedCategory === 'combos') {
@@ -89,7 +95,13 @@ export const ShopPage = () => {
 
     // Category filter
     if (selectedCategory !== 'all') {
-      items = items.filter(p => p.category === selectedCategory);
+      if (selectedCategory === 'health-mix-ghee') {
+        items = items.filter(p => p.category === 'health-mix-ghee' || p.category === 'health-mix' || p.category === 'ghee');
+      } else if (selectedCategory === 'masalas-spices') {
+        items = items.filter(p => p.category === 'masalas-spices' || p.category === 'masalas');
+      } else {
+        items = items.filter(p => p.category === selectedCategory);
+      }
     }
 
     // Search query filter
@@ -123,10 +135,10 @@ export const ShopPage = () => {
   const categoriesTabList = [
     { id: 'all', label: 'All Products', count: products.length },
     { id: 'thokku', label: 'Thokku Varieties', count: products.filter(p => p.category === 'thokku').length },
-    { id: 'health-mix', label: 'Health Mix & Grains', count: products.filter(p => p.category === 'health-mix').length },
-    { id: 'ghee', label: 'Ghee', count: products.filter(p => p.category === 'ghee').length },
-    { id: 'masalas', label: 'Masalas', count: products.filter(p => p.category === 'masalas').length },
-    { id: 'skin-hair', label: 'Skin & Hair Care', count: products.filter(p => p.category === 'skin-hair').length },
+    { id: 'health-mix-ghee', label: 'Health Mix & Ghee', count: products.filter(p => p.category === 'health-mix-ghee' || p.category === 'health-mix' || p.category === 'ghee').length },
+    { id: 'dosa-batters', label: 'Dosa Batters', count: products.filter(p => p.category === 'dosa-batters').length },
+    { id: 'masalas-spices', label: 'Masalas & Spice Powders', count: products.filter(p => p.category === 'masalas-spices' || p.category === 'masalas').length },
+    { id: 'skin-hair', label: 'Skin and Hair Care', count: products.filter(p => p.category === 'skin-hair').length },
     { id: 'combos', label: 'Combo Bundles', count: comboOffers.length },
   ];
 
@@ -145,7 +157,7 @@ export const ShopPage = () => {
             {selectedCategory !== 'all' && (
               <>
                 <span>/</span>
-                <span className="text-gold-antique capitalize">{selectedCategory.replace(/-/g, ' ')}</span>
+                <span className="text-gold-antique">{currentCategoryInfo.name}</span>
               </>
             )}
           </div>
@@ -340,9 +352,13 @@ export const ShopPage = () => {
               <Search className="w-8 h-8 opacity-60" />
             </div>
             <div className="space-y-1">
-              <h3 className="font-fraunces text-xl font-bold text-cream-warm">No matching items found</h3>
+              <h3 className="font-fraunces text-xl font-bold text-cream-warm">
+                {searchQuery ? "No matching items found" : `${currentCategoryInfo.name} Coming Soon`}
+              </h3>
               <p className="font-sans text-xs sm:text-sm text-cream-warm/70">
-                We couldn't find any products matching "{searchQuery}". Try searching for another ingredient or clearing your filters.
+                {searchQuery
+                  ? `We couldn't find any products matching "${searchQuery}". Try searching for another ingredient or clearing your filters.`
+                  : "Our traditional small-batch formulations for this collection are currently being handcrafted with farm-fresh native ingredients. Explore our other handcrafted collections below."}
               </p>
             </div>
             <button

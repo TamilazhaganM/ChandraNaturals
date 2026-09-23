@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/api';
+import { productCategories } from '../../data/products';
 import {
   X,
   Plus,
@@ -14,17 +15,53 @@ import {
   Leaf
 } from 'lucide-react';
 
+import tomatoMixImg from "../../assets/Thokku's/tomato_mix_.jpg";
+import curryLeafMixImg from "../../assets/Thokku's/curry_leaf_mix_.jpg";
+import mudakathanMixImg from "../../assets/Thokku's/mudakathan_mix_.jpg";
+import pirandaiMixImg from "../../assets/Thokku's/pirandai_mix_.jpg";
+import mudavattukalMixImg from "../../assets/Thokku's/mudavattukal_mix.jpg";
+import onionMixImg from "../../assets/Thokku's/onion_mix_.jpg";
+import prawnThokkuImg from "../../assets/Thokku's/prawn_thokku_.jpg";
+import vathakuzhambuMixImg from "../../assets/Thokku's/vathakuzhambu_mix_.jpg";
+
+import healthMixImg from "../../assets/Health Mix & Ghee/hd_health_mix_1789817240085.jpg";
+import pureCowGheeImg from "../../assets/Health Mix & Ghee/hd_pure_cow_ghee_1789817523651.jpg";
+import karuppukavuniImg from "../../assets/Health Mix & Ghee/karuppukavuni_pedestal_.jpg";
+
+import poongarDosaImg from "../../assets/Dosa Batters/hd_poongar_dosa_1789817696629.jpg";
+import rathasaliDosaImg from "../../assets/Dosa Batters/hd_rathasali_dosa_1789817349310.jpg";
+import thillanayagamDosaImg from "../../assets/Dosa Batters/hd_thillanayagam_dosa_1789817295945.jpg";
+
+import corianderPowderImg from "../../assets/Masalas & Spice Powders/hd_coriander_powder_1790169993156.jpg";
+import garamMasalaImg from "../../assets/Masalas & Spice Powders/hd_garam_masala_1790170100941.jpg";
+import mudavanPodiImg from "../../assets/Masalas & Spice Powders/hd_mudavan_podi_1789817926384.jpg";
+import murungaiKeeraiPodiImg from "../../assets/Masalas & Spice Powders/hd_murungai_keerai_podi_1789817878222.jpg";
+import pirandaiIdliPodiImg from "../../assets/Masalas & Spice Powders/hd_pirandai_idli_podi_1790171319996.jpg";
+import sambarPowderImg from "../../assets/Masalas & Spice Powders/hd_sambar_powder_1790171374821.jpg";
+import kashmiriChiliPowderImg from "../../assets/Masalas & Spice Powders/kashmiri-chili-powder-hd.jpg";
+
 const PRESET_IMAGES = [
-  { label: 'Tomato Mix', url: "/assets/Thokku's/tomato_mix_.jpg" },
-  { label: 'Curry Leaf Mix', url: "/assets/Thokku's/curry_leaf_mix_.jpg" },
-  { label: 'Mudakathan Mix', url: "/assets/Thokku's/mudakathan_mix_.jpg" },
-  { label: 'Pirandai Mix', url: "/assets/Thokku's/pirandai_mix_.jpg" },
-  { label: 'Mulaikattiya Payaru', url: "/assets/Thokku's/mulaikattiya_payaru_mix_.jpg" },
-  { label: 'Poondu Milagu Mix', url: "/assets/Thokku's/poondu_milagu_mix_.jpg" },
-  { label: 'Karuppu Kavuni Rice', url: "/assets/Thokku's/karuppukavuni_pedestal_.jpg" },
-  { label: 'Desi Cow Ghee', url: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?q=80&w=800' },
-  { label: 'Artisanal Masala', url: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=800' },
-  { label: 'Botanical Hair & Skin', url: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800' }
+  { label: 'Tomato Mix', url: tomatoMixImg },
+  { label: 'Curry Leaf Mix', url: curryLeafMixImg },
+  { label: 'Mudakathan Mix', url: mudakathanMixImg },
+  { label: 'Pirandai Mix', url: pirandaiMixImg },
+  { label: 'Mudavattukal Mix', url: mudavattukalMixImg },
+  { label: 'Small Onion Mix', url: onionMixImg },
+  { label: 'Prawn Thokku', url: prawnThokkuImg },
+  { label: 'Vathakuzhambu Mix', url: vathakuzhambuMixImg },
+  { label: 'Desi Cow Ghee', url: pureCowGheeImg },
+  { label: 'Sprouted Health Mix', url: healthMixImg },
+  { label: 'Karuppu Kavuni Rice', url: karuppukavuniImg },
+  { label: 'Poongar Dosa Batter', url: poongarDosaImg },
+  { label: 'Rathasali Dosa Batter', url: rathasaliDosaImg },
+  { label: 'Thillanayagam Batter', url: thillanayagamDosaImg },
+  { label: 'Sambar Powder', url: sambarPowderImg },
+  { label: 'Coriander Powder', url: corianderPowderImg },
+  { label: 'Garam Masala', url: garamMasalaImg },
+  { label: 'Mudavan Podi', url: mudavanPodiImg },
+  { label: 'Murungai Podi', url: murungaiKeeraiPodiImg },
+  { label: 'Pirandai Podi', url: pirandaiIdliPodiImg },
+  { label: 'Kashmiri Chili Powder', url: kashmiriChiliPowderImg }
 ];
 
 export const AddProductModal = ({ isOpen, onClose, onProductCreated }) => {
@@ -205,12 +242,11 @@ export const AddProductModal = ({ isOpen, onClose, onProductCreated }) => {
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-forest-ink border border-gold-antique/30 text-cream-warm text-xs sm:text-sm font-sans focus:outline-none focus:border-gold-antique"
               >
-                <option value="thokku">Thokku Varieties (Slow-Cooked Relishes)</option>
-                <option value="health-mix">Health Mix & Grains</option>
-                <option value="ghee">Cultured Desi Cow Ghee</option>
-                <option value="masalas">Heirloom Stone-Ground Masalas</option>
-                <option value="skin-hair">Botanical Skin & Hair Care</option>
-                <option value="combos">Curated Feast Combos</option>
+                {productCategories.map(cat => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name} ({cat.subtitle})
+                  </option>
+                ))}
               </select>
             </div>
           </div>

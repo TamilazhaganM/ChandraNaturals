@@ -7,13 +7,13 @@ export const FeaturedProductsSection = () => {
   // Curate 8 top signature products spanning the brand's key offerings
   const featuredProductIds = [
     'tomato-thokku',
-    'curry-leaf-thokku',
-    'mudakathan-thokku',
-    'pirandai-thokku',
-    'poondu-milagu-thokku',
-    'mulaikattiya-payaru-thokku',
+    'mudavattukal-thokku',
     'a2-bilona-ghee',
-    'karuppu-kavuni-mix'
+    'sprouted-health-mix',
+    'rathasali-dosa-batter',
+    'poongar-dosa-batter',
+    'sambar-powder',
+    'pirandai-idli-podi'
   ];
 
   // Pick the 8 featured items (with fallback to first 8 products if any id differs)

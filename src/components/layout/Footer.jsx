@@ -151,28 +151,28 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/shop/health-mix" className="hover:text-gold-antique transition-colors">
-                  Health Mix & Grains
+                <Link to="/shop/health-mix-ghee" className="hover:text-gold-antique transition-colors">
+                  Health Mix & Ghee
                 </Link>
               </li>
               <li>
-                <Link to="/shop/ghee" className="hover:text-gold-antique transition-colors">
-                  Vedic Bilona Ghee
+                <Link to="/shop/dosa-batters" className="hover:text-gold-antique transition-colors">
+                  Dosa Batters
                 </Link>
               </li>
               <li>
-                <Link to="/shop/masalas" className="hover:text-gold-antique transition-colors">
-                  Artisanal Masalas
+                <Link to="/shop/masalas-spices" className="hover:text-gold-antique transition-colors">
+                  Masalas & Spice Powders
                 </Link>
               </li>
               <li>
                 <Link to="/shop/skin-hair" className="hover:text-gold-antique transition-colors">
-                  Herbal Skin & Hair
+                  Skin and Hair Care
                 </Link>
               </li>
               <li>
                 <Link to="/shop/combos" className="hover:text-gold-antique transition-colors">
-                  Pantry Combos
+                  Combo Bundles
                 </Link>
               </li>
             </ul>
