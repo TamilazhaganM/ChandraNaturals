@@ -1,7 +1,4 @@
+# Chandra Naturals - Pre-launch / Development Mode
+# Blocking all web crawlers and search engine bots from indexing
 User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /account
-Disallow: /checkout
-
-Sitemap: https://www.chandranaturals.in/sitemap.xml
+Disallow: /

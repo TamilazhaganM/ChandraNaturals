@@ -30,7 +30,8 @@ import { FloatingCartBar } from './components/cart/FloatingCartBar';
 import { OrderSummaryDrawer } from './components/cart/OrderSummaryDrawer';
 import { WishlistDrawer } from './components/wishlist/WishlistDrawer';
 import { BackToTop } from './components/common/BackToTop';
-import { CheckCircle2 } from 'lucide-react';
+import { ComingSoonPage } from './pages/ComingSoonPage';
+import { CheckCircle2, Eye } from 'lucide-react';
 
 const ToastNotification = () => {
   const { toastMessage } = useCart();
@@ -47,6 +48,29 @@ const ToastNotification = () => {
 };
 
 export function App() {
+  const [hasPreviewAccess, setHasPreviewAccess] = React.useState(() => {
+    if (typeof window === 'undefined') return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('preview') === 'true' || urlParams.get('key') === 'chandra') {
+      sessionStorage.setItem('cn_preview_access', 'true');
+      return true;
+    }
+    return sessionStorage.getItem('cn_preview_access') === 'true';
+  });
+
+  // Pre-launch maintenance mode (active by default unless explicitly disabled with 'false')
+  const isMaintenance = import.meta.env.VITE_MAINTENANCE_MODE !== 'false';
+  const isAdminPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+
+  // If maintenance mode is active and user has not unlocked preview or is not on an admin route:
+  if (isMaintenance && !isAdminPath && !hasPreviewAccess) {
+    return (
+      <ThemeProvider>
+        <ComingSoonPage onUnlockPreview={() => setHasPreviewAccess(true)} />
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -55,6 +79,24 @@ export function App() {
             <BrowserRouter>
               <ScrollToTop />
               <div className="min-h-screen flex flex-col relative bg-forest-ink text-cream-warm">
+                {/* Admin/Preview Active Bar when Maintenance is ON */}
+                {isMaintenance && hasPreviewAccess && (
+                  <div className="bg-gold-antique text-forest-ink text-xs font-medium py-1.5 px-4 text-center sticky top-0 z-50 flex items-center justify-center gap-3 shadow-md">
+                    <span className="flex items-center gap-1.5">
+                      <Eye className="w-3.5 h-3.5" />
+                      <strong>Preview Mode Active</strong> — Website is hidden from public & search engines
+                    </span>
+                    <button
+                      onClick={() => {
+                        sessionStorage.removeItem('cn_preview_access');
+                        setHasPreviewAccess(false);
+                      }}
+                      className="px-2 py-0.5 rounded bg-forest-ink text-gold-champagne text-[11px] font-semibold hover:bg-forest-deep transition-all"
+                    >
+                      Exit Preview
+                    </button>
+                  </div>
+                )}
                 {/* Sticky Navigation Header */}
                 <Navbar />
                 
