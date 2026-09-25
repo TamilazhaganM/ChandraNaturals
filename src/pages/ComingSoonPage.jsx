@@ -6,15 +6,16 @@ export function ComingSoonPage({ onUnlockPreview }) {
   const [passphrase, setPassphrase] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  const secretKey = (import.meta.env.VITE_PREVIEW_SECRET || 'chandra').trim().toLowerCase();
+
   const handleUnlock = (e) => {
     e.preventDefault();
-    // Default preview passphrase can be 'preview' or 'chandra'
-    if (passphrase.trim().toLowerCase() === 'chandra' || passphrase.trim().toLowerCase() === 'preview') {
+    if (passphrase.trim().toLowerCase() === secretKey) {
       sessionStorage.setItem('cn_preview_access', 'true');
       if (onUnlockPreview) onUnlockPreview();
       else window.location.reload();
     } else {
-      setErrorMsg('Incorrect passphrase. Use "chandra" to preview.');
+      setErrorMsg('Invalid access key. Access denied.');
     }
   };
 
@@ -103,29 +104,27 @@ export function ComingSoonPage({ onUnlockPreview }) {
           © {new Date().getFullYear()} Chandra Naturals. All rights reserved.
         </div>
 
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setShowUnlockModal(true)}
-            className="flex items-center gap-1.5 hover:text-gold-champagne transition-colors text-[11px]"
-            title="Team preview mode"
-          >
-            <Lock className="w-3 h-3 text-gold-antique/70" />
-            <span>Preview Mode</span>
-          </button>
-        </div>
+        <button
+          onClick={() => setShowUnlockModal(true)}
+          className="text-cream-warm/25 hover:text-gold-antique transition-colors p-1"
+          aria-label="Admin access"
+          title=""
+        >
+          <Lock className="w-3.5 h-3.5" />
+        </button>
       </footer>
 
       {/* Unlock Passphrase Modal for Store Owners/Admins */}
       {showUnlockModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-forest-deep border border-gold-antique/40 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-gold-antique" />
-                <h3 className="font-fraunces font-bold text-cream-ivory text-base">Store Preview Access</h3>
+                <Lock className="w-4 h-4 text-gold-antique" />
+                <h3 className="font-fraunces font-bold text-cream-ivory text-base">Authorized Access</h3>
               </div>
               <button
-                onClick={() => { setShowUnlockModal(false); setErrorMsg(''); }}
+                onClick={() => { setShowUnlockModal(false); setErrorMsg(''); setPassphrase(''); }}
                 className="text-cream-warm/50 hover:text-cream-ivory text-sm"
               >
                 ✕
@@ -133,16 +132,16 @@ export function ComingSoonPage({ onUnlockPreview }) {
             </div>
 
             <p className="text-xs text-cream-warm/70 mb-4">
-              Enter the preview key (<strong>chandra</strong>) or log into Admin to review the store prior to official launch.
+              Enter authorized access key to preview the store.
             </p>
 
             <form onSubmit={handleUnlock} className="space-y-3">
               <input
                 type="password"
-                placeholder="Enter passphrase"
+                placeholder="Access key"
                 value={passphrase}
                 onChange={(e) => { setPassphrase(e.target.value); setErrorMsg(''); }}
-                className="w-full px-3 py-2 rounded-lg bg-forest-ink border border-cream-warm/20 text-cream-ivory text-sm focus:outline-none focus:border-gold-antique"
+                className="w-full px-3 py-2 rounded-lg bg-forest-ink border border-cream-warm/20 text-cream-ivory text-sm focus:outline-none focus:border-gold-antique tracking-wider"
                 autoFocus
               />
 
@@ -161,7 +160,7 @@ export function ComingSoonPage({ onUnlockPreview }) {
                   href="/admin"
                   className="px-3 py-2 rounded-lg border border-cream-warm/20 text-cream-warm hover:text-cream-ivory text-xs text-center font-medium"
                 >
-                  Admin Login
+                  Admin
                 </a>
               </div>
             </form>

@@ -51,7 +51,8 @@ export function App() {
   const [hasPreviewAccess, setHasPreviewAccess] = React.useState(() => {
     if (typeof window === 'undefined') return false;
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('preview') === 'true' || urlParams.get('key') === 'chandra') {
+    const secretKey = (import.meta.env.VITE_PREVIEW_SECRET || 'chandra').trim().toLowerCase();
+    if (urlParams.get('key')?.trim().toLowerCase() === secretKey) {
       sessionStorage.setItem('cn_preview_access', 'true');
       return true;
     }
